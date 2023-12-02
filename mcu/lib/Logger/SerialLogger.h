@@ -21,6 +21,7 @@ public:
     static void Begin()
     {
         Serial.begin(SERIAL_LOGGER_BAUD_RATE);
+        Serial.flush();
     }
 
     static ILogger& getInstance();
@@ -39,12 +40,12 @@ public:
     /// @brief Logs formatted message to serial with prefix: [TRACE][millis] %message%
     /// @param format Formatted String
     /// @param  ARGS to insert to the formatted string.
-    virtual void Trace(const char* format, ...) = 0;
+    void Trace(const char* format, ...) override;
 
     /// @brief Logs formatted message to serial with prefix: [DEBUG][millis] %message%
     /// @param format Formatted String
     /// @param  ARGS to insert to the formatted string.
-    virtual void Debug(const char* format, ...) = 0;
+    void Debug(const char* format, ...) override;
 
     /// @brief Logs formatted message to serial with prefix: [ERROR][millis] %message%
     /// @param format Formatted String

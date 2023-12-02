@@ -4,12 +4,12 @@
 #include <Arduino.h>
 #include <SerialLogger.h>
 #include <memory>
+#include <type_traits>
 
 class LoggerFactory
 {
-private:
 public:
-    template <typename T>
+    template <class T>
     static std::shared_ptr<ILogger> Create(T name)
     {
         std::shared_ptr<ILogger> loggerInstance = std::make_shared<SerialLogger>(typeid(T).name());

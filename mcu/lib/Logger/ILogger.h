@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+/// @brief Default interface for logging.
+/// Can be used for serial, file or whatever logging.
 class ILogger
 {
 public:

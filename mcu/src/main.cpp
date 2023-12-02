@@ -8,11 +8,21 @@ class TestClass
 public:
   void Test()
   {
-    auto logger = LoggerFactory::Create(this);
-    logger->Info("Hello from inside test class");
+    auto testLogger = LoggerFactory::Create(this);
+    int count = 0;
+    testLogger->Info("Does this work");
+    testLogger->Info("Does this work [%d]", count);
+    testLogger->Trace("Does this work");
+    testLogger->Trace("Does this work [%d]", count);
+    testLogger->Debug("Does this work");
+    testLogger->Debug("Does this work [%d]", count);
+    testLogger->Error("Does this work");
+    testLogger->Error("Does this work [%d]", count);
   }
 
 };
+
+std::shared_ptr<ILogger> testLogger;
 
 void setup() {
   SerialLogger::Begin();
