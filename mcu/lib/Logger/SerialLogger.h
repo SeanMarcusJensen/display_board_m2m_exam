@@ -21,7 +21,7 @@ public:
     /// format: [%severity%][millis()] %message%
     /// @param severity The prefix of the log message
     /// @param message Your Log message.
-    void Log(const char* severity, const String& message);
+    void Log(const String& severity, const String& message);
 
     /// @brief Logs message to serial with prefix: [INFO][millis] %message%
     /// @param message The message to be logged.

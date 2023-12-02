@@ -1,29 +1,30 @@
 #include "SerialLogger.h"
-#include <time.h>
 
 SerialLogger::SerialLogger() { }
 
-SerialLogger& SerialLogger::getInstance() {
+SerialLogger& SerialLogger::getInstance()
+{
     static SerialLogger instance;
     return instance;
 }
 
-void SerialLogger::Begin() {
+void SerialLogger::Begin()
+{
     Serial.begin(SERIAL_LOGGER_BAUD_RATE);
 }
 
-void SerialLogger::Log(const char* severity, const String& message) {
-    size_t bufferSize = 1 + sizeof(severity) + message.length() + 20;
-    char* buffer = new char[bufferSize];
+void SerialLogger::Log(const String& severity, const String& message)
+{
+    size_t bufferSize = 1 + severity.length() + message.length() + 20;
+    char buffer[bufferSize];
 
-    sprintf(buffer, " [%s][%lu] %s", severity, millis(), message.c_str());
+    snprintf(buffer, sizeof(buffer), " [%s][%lu] %s", severity.c_str(), millis(), message.c_str());
 
     Serial.println(buffer);
-
-    delete[] buffer;
 }
 
-void SerialLogger::Info(const String& message) {
+void SerialLogger::Info(const String& message)
+{
     SerialLogger::Log("INFO", message);
 }
 
@@ -35,10 +36,11 @@ void SerialLogger::Info(const char* format, ...)
     vsnprintf(logMessage, sizeof(logMessage), format, args);
     va_end(args);
 
-    SerialLogger::Info(logMessage);
+    SerialLogger::Info(String(logMessage));
 }
 
-void SerialLogger::Error(const String& message) {
+void SerialLogger::Error(const String& message)
+{
     SerialLogger::Log("ERROR", message);
 }
 
@@ -50,7 +52,7 @@ void SerialLogger::Error(const char* format, ...)
     vsnprintf(logMessage, sizeof(logMessage), format, args);
     va_end(args);
 
-    SerialLogger::Error(logMessage);
+    SerialLogger::Error(String(logMessage));
 }
 
 SerialLogger& Logger = SerialLogger::getInstance();
