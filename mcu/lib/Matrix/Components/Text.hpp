@@ -9,7 +9,7 @@
 class Text : public IRenderedComponent
 {
 private:
-    const char* _text;
+    char* _text;
     int32_t _x;
     int32_t _y;
     uint16_t _textWidth;
@@ -24,15 +24,19 @@ private:
         matrix->getTextBounds(_text, _x, _y, &x1, &y1, &_textWidth, &_textHeight);
     }
 
-
 public:
-    Text(const char* text, Color color)
-        : _text(text), _color(color)
-        {
-            _x = 0;
-            _y = 0;
-            _logger = LoggerFactory::Create(this);
-        }
+    Text(Color color, const char* format, ...)
+        : _color(color), _x(0), _y(0)
+    {
+        _logger = LoggerFactory::Create(this);
+
+        _text = new char[512];
+
+        va_list args;
+        va_start(args, format);
+        vsnprintf(_text, 511, format, args);
+        va_end(args);
+    }
 
     bool Configure(const std::unique_ptr<Adafruit_NeoMatrix>& matrix) override
     {
@@ -41,24 +45,23 @@ public:
         _logger->Trace("Text: w(%d), h(%d)", _textWidth, _textHeight);
         _logger->Trace("Setting Size to %d", 1);
         matrix->setTextSize(1);
+        matrix->setTextColor(matrix->Color(_color.r, _color.g, _color.b));
         _x = matrix->width();
-        _y = 0;
+        _y = (matrix->height() - _textHeight) / 2; // Center text
         return true;
     }
 
     void Render(const std::unique_ptr<Adafruit_NeoMatrix>& matrix) override
     {
-        matrix->setTextColor(matrix->Color(_color.r, _color.g, _color.b));
         matrix->setCursor(_x, _y);
         matrix->print(F(_text));
-        _logger->Trace("Text: %s", _text);
-        _logger->Trace("X: %d", _x);
-        _logger->Trace("Text Length: %d", _textWidth);
+        _logger->Trace("Text[w(%d), h(%d)]: %s", _textWidth, _textHeight, _text);
+        _logger->Trace("Cursor: x(%d), y(%d)", _x, _y);
+        // Scroll text from right to left
         if (--_x <= (_textWidth * -1))
         {
             _logger->Trace("Resetting X");
             _x = matrix->width();
-            if (++_y >= matrix->height()) _y = 0;
         }
     }
 };

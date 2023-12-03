@@ -30,14 +30,22 @@ private:
 public:
     LedMatrix(std::unique_ptr<Adafruit_NeoMatrix> matrix)
         : _matrix(std::move(matrix))
-        {
+    {
         _logger = LoggerFactory::Create(this);
-        }
+    }
 
     void Begin()
     {
+        _matrix->begin();
         _matrix->setBrightness(10);
         _matrix->setTextWrap(false);
+    }
+
+    void SetMatrix(std::unique_ptr<Adafruit_NeoMatrix> matrix)
+    {
+        _logger->Trace("Setting matrix");
+        _matrix = std::move(matrix);
+        Begin();
     }
 
     void SetRenderable(std::unique_ptr<IRenderedComponent> renderable)
@@ -65,12 +73,12 @@ public:
 
 namespace
 {
+    // TODO: Change at runtime for size.
     LedMatrix myMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
         16, 16, PIN,
         NEO_MATRIX_TOP + NEO_MATRIX_RIGHT +
         NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
         NEO_GRB + NEO_KHZ800)));
-
 }
 
 namespace Matrix
@@ -78,12 +86,15 @@ namespace Matrix
     void Begin()
     {
         myMatrix.Begin();
-        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text("Hello World!", Color {255, 0, 0})));
+        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(Color {255, 0, 0}, "League of Legends")));
     }
 
+    int count = 0;
+    int high = 0;
     void Loop() {
         myMatrix.Loop();
-        delay(100);
+        delay(100); // TODO: Move to non blocking timer.
+        count++;
     }
 }
 
