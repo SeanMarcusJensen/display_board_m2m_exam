@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LoggerFactory.hpp>
+#include <Matrix.hpp>
 
 #define SERIAL_LOGGER_BAUD_RATE 115200
 
@@ -31,8 +32,10 @@ void setup() {
   TestClass c;
   Logger.Info("Serial started at BAUD[%lu]", SERIAL_LOGGER_BAUD_RATE);
   c.Test();
+  Matrix::Begin();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  Matrix::Loop();
 }
