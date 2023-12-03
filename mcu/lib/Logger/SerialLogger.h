@@ -16,6 +16,10 @@ class SerialLogger : public ILogger
 {
 private:
     String _logName;
+
+private:
+    void Log(const String& severity, const char* format, va_list args);
+
 public:
     SerialLogger(String loggerName) : _logName(loggerName) { };
     static void Begin()

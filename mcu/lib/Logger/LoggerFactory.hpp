@@ -12,8 +12,7 @@ public:
     template <class T>
     static std::shared_ptr<ILogger> Create(T name)
     {
-        std::shared_ptr<ILogger> loggerInstance = std::make_shared<SerialLogger>(typeid(T).name());
-        return loggerInstance;
+        return std::make_shared<SerialLogger>(typeid(T).name());
     }
 };
 
