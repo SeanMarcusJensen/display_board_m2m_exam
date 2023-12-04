@@ -3,48 +3,60 @@
 
 #include <Arduino.h>
 
+#include <ILogger.h>
+
 #ifndef SERIAL_LOGGER_BAUD_RATE
 #define SERIAL_LOGGER_BAUD_RATE 115200
 #endif
 
 /// @brief Serial Logger is an abstraction layer on top of serial communication,
 /// to simplify message logging with context to serial.
-class SerialLogger {
-public:
-    static SerialLogger& getInstance();
 
-    /// @brief Starts the Serial Communication.
-    /// Serial.Begin() with the BAUD RATE defined in SERIAL_LOGGER_BAUD_RATE
-    void Begin();
+class SerialLogger : public ILogger
+{
+private:
+    String _logName;
+
+private:
+    void Log(const String& severity, const char* format, va_list args);
+
+public:
+    SerialLogger(String loggerName) : _logName(loggerName) { };
+    static void Begin()
+    {
+        Serial.begin(SERIAL_LOGGER_BAUD_RATE);
+        Serial.flush();
+    }
+
+    static ILogger& getInstance();
 
     /// @brief Logs the message to serial with severity as prefix:
     /// format: [%severity%][millis()] %message%
     /// @param severity The prefix of the log message
     /// @param message Your Log message.
-    void Log(const String& severity, const String& message);
-
-    /// @brief Logs message to serial with prefix: [INFO][millis] %message%
-    /// @param message The message to be logged.
-    void Info(const String& message);
+    void Log(const String& severity, const char* format, ...) override;
 
     /// @brief Logs formatted message to serial with prefix: [INFO][millis] %message%
     /// @param format Formatted String
     /// @param  ARGS to insert to the formatted string.
-    void Info(const char* format, ...);
+    void Info(const char* format, ...) override;
 
-    /// @brief Logs message to serial with prefix: [ERROR][millis] %message%
-    /// @param message The message to be logged.
-    void Error(const String& message);
+    /// @brief Logs formatted message to serial with prefix: [TRACE][millis] %message%
+    /// @param format Formatted String
+    /// @param  ARGS to insert to the formatted string.
+    void Trace(const char* format, ...) override;
+
+    /// @brief Logs formatted message to serial with prefix: [DEBUG][millis] %message%
+    /// @param format Formatted String
+    /// @param  ARGS to insert to the formatted string.
+    void Debug(const char* format, ...) override;
 
     /// @brief Logs formatted message to serial with prefix: [ERROR][millis] %message%
     /// @param format Formatted String
     /// @param  ARGS to insert to the formatted string.
-    void Error(const char* format, ...);
-
-private:
-    SerialLogger();
+    void Error(const char* format, ...) override;
 };
 
-extern SerialLogger& Logger; 
+extern ILogger& Logger; 
 
 #endif // SERIALLOGGER_H

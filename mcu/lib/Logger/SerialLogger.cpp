@@ -1,58 +1,63 @@
 #include "SerialLogger.h"
 
-SerialLogger::SerialLogger() { }
-
-SerialLogger& SerialLogger::getInstance()
+void SerialLogger::Log(const String& severity, const char* format, va_list args)
 {
-    static SerialLogger instance;
-    return instance;
-}
+    char logMessage[512];
+    vsnprintf(logMessage, sizeof(logMessage), format, args);
 
-void SerialLogger::Begin()
-{
-    Serial.begin(SERIAL_LOGGER_BAUD_RATE);
-}
+    size_t bufferSize = 1 + severity.length() + sizeof(logMessage) + sizeof(unsigned long) + _logName.length();
 
-void SerialLogger::Log(const String& severity, const String& message)
-{
-    size_t bufferSize = 1 + severity.length() + message.length() + 20;
     char buffer[bufferSize];
 
-    snprintf(buffer, sizeof(buffer), " [%s][%lu] %s", severity.c_str(), millis(), message.c_str());
+    snprintf(buffer, sizeof(buffer), " [%s][%s][%lu] %s", _logName.c_str(), severity.c_str(), millis(), logMessage);
 
     Serial.println(buffer);
-}
+} 
 
-void SerialLogger::Info(const String& message)
+
+void SerialLogger::Log(const String& severity, const char* format, ...)
 {
-    SerialLogger::Log("INFO", message);
+    va_list args;
+    va_start(args, format);
+    SerialLogger::Log(severity, format, args);
+    va_end(args);
 }
 
 void SerialLogger::Info(const char* format, ...)
 {
-    char logMessage[512];
     va_list args;
     va_start(args, format);
-    vsnprintf(logMessage, sizeof(logMessage), format, args);
+    SerialLogger::Log("INFO", format, args); 
     va_end(args);
-
-    SerialLogger::Info(String(logMessage));
 }
 
-void SerialLogger::Error(const String& message)
+void SerialLogger::Trace(const char* format, ...)
 {
-    SerialLogger::Log("ERROR", message);
+    va_list args;
+    va_start(args, format);
+    SerialLogger::Log("TRACE", format, args); 
+    va_end(args);
+}
+
+void SerialLogger::Debug(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    SerialLogger::Log("DEBUG", format, args); 
+    va_end(args);
 }
 
 void SerialLogger::Error(const char* format, ...)
 {
-    char logMessage[512];
     va_list args;
     va_start(args, format);
-    vsnprintf(logMessage, sizeof(logMessage), format, args);
+    SerialLogger::Log("ERROR", format, args); 
     va_end(args);
-
-    SerialLogger::Error(String(logMessage));
 }
 
-SerialLogger& Logger = SerialLogger::getInstance();
+ILogger& SerialLogger::getInstance() {
+    static SerialLogger instance("Default");
+    return instance;
+}
+
+ILogger& Logger = SerialLogger::getInstance();
