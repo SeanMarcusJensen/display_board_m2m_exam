@@ -4,8 +4,6 @@
 
 #define SERIAL_LOGGER_BAUD_RATE 115200
 
-std::shared_ptr<ILogger> testLogger;
-
 void setup() {
   SerialLogger::Begin();
 
