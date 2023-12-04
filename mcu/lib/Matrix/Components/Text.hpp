@@ -25,6 +25,11 @@ private:
     }
 
 public:
+    ~Text()
+    {
+        delete[] _text;
+    }
+
     Text(Color color, const char* format, ...)
         : _color(color), _x(0), _y(0)
     {
