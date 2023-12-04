@@ -10,6 +10,7 @@
 #include <Components/IRenderedComponent.h>
 #include <Color.h>
 #include <Components/Text.hpp>
+#include <Components/Image.hpp>
 
 #ifndef PSTR
 #define PSTR // Make Arduino Due happy
@@ -89,12 +90,9 @@ namespace Matrix
         myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(Color {255, 0, 0}, "League of Legends")));
     }
 
-    int count = 0;
-    int high = 0;
     void Loop() {
         myMatrix.Loop();
         delay(100); // TODO: Move to non blocking timer.
-        count++;
     }
 }
 
