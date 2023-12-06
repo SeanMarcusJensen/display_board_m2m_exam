@@ -22,6 +22,24 @@ bool TryGetString(JsonObject obj, const char* key, char* value)
   return false;
 }
 
+bool TryGetUInt16Array(JsonObject obj, const char* key, uint16_t* arr, size_t len)
+{
+  if (obj.containsKey(key) && obj[key].is<JsonArray>())
+  {
+    JsonArray arrJson = obj[key].as<JsonArray>();
+    if (arrJson.size() <= len)
+    {
+      size_t i = 0;
+      for (JsonVariant v : arrJson)
+      {
+        arr[i++] = static_cast<uint16_t>(v.as<int>());
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
 template <typename T>
 bool TryGetValue(JsonObject obj, const char* key, T* value)
 {
@@ -33,13 +51,13 @@ bool TryGetValue(JsonObject obj, const char* key, T* value)
   return false;
 }
 
+StaticJsonDocument<8192> doc; // Create a StaticJsonDocument with a capacity of 512 bytes. Adjust if necessary.
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Logger.Info("Message arrived [%s]", topic);
   Logger.Info("Payload: %s", payload);
 
   // TWO IMAGES
-  StaticJsonDocument<512> doc; // Create a StaticJsonDocument with a capacity of 512 bytes. Adjust if necessary.
   DeserializationError error = deserializeJson(doc, payload, length); // Parse the payload
 
   if (error)
@@ -68,13 +86,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
         Logger.Info("Color: %d", color);
       }
 
-      Matrix::SetComponent(static_cast<uint16_t>(color), text);
+      Matrix::SetText(static_cast<uint16_t>(color), text);
   }
   else if (strcmp(topic, "matrix/image") == 0)
   {
     Logger.Info("Image");
     // Need to set image
-    // Matrix::SetComponent(obj["image"].as<char*>());
+    uint16_t* image = new uint16_t[16 * 16];
+    if (TryGetUInt16Array(obj, "payload", image, 16 * 16))
+    {
+      Logger.Info("Image: %d", image);
+      Matrix::SetImage(image);
+    }
   }
   else
   {
@@ -90,6 +113,7 @@ void setup() {
   SerialLogger::Begin();
 
   delay(2000); // Wait for serial to work, so the initial message is displayed.
+  client.setBufferSize(4096);
 
   Logger.Info("Serial started at BAUD[%d]", SERIAL_LOGGER_BAUD_RATE);
 

@@ -84,9 +84,14 @@ namespace
 
 namespace Matrix
 {
-    void SetComponent(const uint16_t color, const char* component)
+    void SetText(const uint16_t color, const char* component)
     {
         myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(color, component)));
+    }
+
+    void SetImage(uint16_t* image)
+    {
+        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Image(16, 16, image)));
     }
 
     void Begin()
