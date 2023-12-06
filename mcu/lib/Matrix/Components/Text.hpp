@@ -14,7 +14,7 @@ private:
     int32_t _y;
     uint16_t _textWidth;
     uint16_t _textHeight;
-    Color _color;
+    uint16_t _color;
     std::shared_ptr<ILogger> _logger;
 
 private:
@@ -30,7 +30,7 @@ public:
         delete[] _text;
     }
 
-    Text(Color color, const char* format, ...)
+    Text(uint16_t color, const char* format, ...)
         : _color(color), _x(0), _y(0)
     {
         _logger = LoggerFactory::Create(this);
@@ -50,7 +50,7 @@ public:
         _logger->Trace("Text: w(%d), h(%d)", _textWidth, _textHeight);
         _logger->Trace("Setting Size to %d", 1);
         matrix->setTextSize(1);
-        matrix->setTextColor(matrix->Color(_color.r, _color.g, _color.b));
+        matrix->setTextColor(_color);
         _x = matrix->width();
         _y = (matrix->height() - _textHeight) / 2; // Center text
         return true;
