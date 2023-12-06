@@ -84,10 +84,14 @@ namespace
 
 namespace Matrix
 {
+    void SetComponent(const uint16_t color, const char* component)
+    {
+        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(color, component)));
+    }
+
     void Begin()
     {
         myMatrix.Begin();
-        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(Color {255, 0, 0}, "League of Legends")));
     }
 
     void Loop() {
