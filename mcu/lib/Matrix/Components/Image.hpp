@@ -35,8 +35,6 @@ public:
         _logger->Trace("Image::SetImage()");
         delete _image;
         _image = image;
-        // Prevent memory leaks
-        // memcpy(_image, image, _width * _height * sizeof(uint16_t));
     }
 
     bool Configure(const std::unique_ptr<Adafruit_NeoMatrix>& matrix) override
