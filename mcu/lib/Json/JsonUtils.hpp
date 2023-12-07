@@ -7,6 +7,11 @@ namespace JSON
 {
     bool TryGetString(JsonObject obj, const char* key, char* value, size_t len)
     {
+        if (obj.isNull())
+        {
+            return false;
+        }
+
         if (obj.containsKey(key))
         {
             strncpy(value, obj[key], len - 1);
@@ -17,6 +22,11 @@ namespace JSON
 
     bool TryGetUInt16Array(JsonObject obj, const char* key, uint16_t* arr, size_t len)
     {
+        if (obj.isNull())
+        {
+            return false;
+        }
+
         if (obj.containsKey(key) && obj[key].is<JsonArray>())
         {
             JsonArray arrJson = obj[key].as<JsonArray>();
@@ -36,6 +46,11 @@ namespace JSON
     template <typename T>
     bool TryGetValue(JsonObject obj, const char* key, T* value)
     {
+        if (obj.isNull())
+        {
+            return false;
+        }
+
         if (obj.containsKey(key))
         {
             *value = obj[key].as<T>();
