@@ -11,6 +11,9 @@
 #include <Color.h>
 #include <Components/Text.hpp>
 #include <Components/Image.hpp>
+#include <functional>
+#include <ArduinoJson.h>
+#include <JsonUtils.hpp>
 
 #ifndef PSTR
 #define PSTR // Make Arduino Due happy
@@ -32,7 +35,7 @@ public:
     LedMatrix(std::unique_ptr<Adafruit_NeoMatrix> matrix)
         : _matrix(std::move(matrix))
     {
-        _logger = LoggerFactory::Create(this);
+        _logger = LoggerFactory::Create("LedMatrix");
     }
 
     uint16_t Width() const
@@ -113,8 +116,42 @@ namespace Matrix
         myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Image(myMatrix.Width(), myMatrix.Height(), image)));
     }
 
-    void Begin()
+    void Begin(const std::function<JsonObject(const char*)> getCache)
     {
+        JsonObject scale = getCache("/spiffs/scale.json");
+        uint16_t width, height;
+        if (JSON::TryGetValue(scale, "width", &width) && JSON::TryGetValue(scale, "height", &height))
+        {
+            Scale(width, height);
+        }
+        else
+        {
+            Scale(16, 16);
+        }
+
+        JsonObject content = getCache("/spiffs/content.json");
+        char type[32];
+        if (JSON::TryGetString(content, "type", type, 32))
+        {
+            if (strcmp(type, "text") == 0)
+            {
+                char text[512];
+                uint16_t color;
+                if (JSON::TryGetString(content, "payload", text, 512) && JSON::TryGetValue(content, "color", &color))
+                {
+                    SetText(color, text);
+                }
+            }
+            else if (strcmp(type, "image") == 0)
+            {
+                uint16_t* image = new uint16_t[myMatrix.Width() * myMatrix.Height()];
+                if (JSON::TryGetUInt16Array(content, "payload", image, myMatrix.Width() * myMatrix.Height()))
+                {
+                    SetImage(image);
+                }
+            }
+        }
+
         myMatrix.Begin();
     }
 

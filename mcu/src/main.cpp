@@ -3,55 +3,18 @@
 #include <Matrix.hpp>
 
 #include <WiFi.h>
-#include <PubSubClient.h>
 
 #include "secrets.h"
 #include <cstring>
 
 #include <MQTT.hpp>
+#include <Cache.hpp>
+#include <JsonUtils.hpp>
+#include <FS.h>
+#include <SPIFFS.h>
 
 #define SERIAL_LOGGER_BAUD_RATE 115200
 
-#include <ArduinoJson.h>
-
-bool TryGetString(JsonObject obj, const char* key, char* value)
-{
-  if (obj.containsKey(key))
-  {
-    strcpy(value, obj[key]);
-    return true;
-  }
-  return false;
-}
-
-bool TryGetUInt16Array(JsonObject obj, const char* key, uint16_t* arr, size_t len)
-{
-  if (obj.containsKey(key) && obj[key].is<JsonArray>())
-  {
-    JsonArray arrJson = obj[key].as<JsonArray>();
-    if (arrJson.size() <= len)
-    {
-      size_t i = 0;
-      for (JsonVariant v : arrJson)
-      {
-        arr[i++] = static_cast<uint16_t>(v.as<int>());
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
-template <typename T>
-bool TryGetValue(JsonObject obj, const char* key, T* value)
-{
-  if (obj.containsKey(key))
-  {
-    *value = obj[key].as<T>();
-    return true;
-  }
-  return false;
-}
 
 WiFiClient espClient;
 
@@ -62,7 +25,18 @@ void setup() {
 
   Logger.Info("Serial started at BAUD[%d]", SERIAL_LOGGER_BAUD_RATE);
 
-  Matrix::Begin();
+  if (!SPIFFS.begin(true)) {
+      Logger.Error("Failed to mount SPIFFS. Formatting...");
+      SPIFFS.format();
+      if (!SPIFFS.begin()) {
+          Logger.Error("Failed to mount SPIFFS after formatting.");
+          esp_restart();
+      }
+  }
+
+  Matrix::Begin(Cache::GetJsonObject);
+
+  // TODO: ADD WiFiManager
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -75,38 +49,43 @@ void setup() {
   MQTT::AddTopicHandler("matrix/scale", [](const JsonObject& obj) {
     Logger.Info("Scale");
     uint16_t width, height;
-    if (TryGetValue(obj, "width", &width) && TryGetValue(obj, "height", &height))
+    if (JSON::TryGetValue(obj, "width", &width) && JSON::TryGetValue(obj, "height", &height))
     {
       Matrix::Scale(width, height);
+      Cache::SetJsonObject(obj, "/spiffs/scale.json");
     }
   });
 
   MQTT::AddTopicHandler("matrix/text", [](const JsonObject& obj) {
     Logger.Info("Text");
     char text[512];
-    if (TryGetString(obj, "payload", text))
+
+    if (JSON::TryGetString(obj, "payload", text, 512))
     {
       Logger.Info("Text: %s", text);
     }
 
     int color;
-    if (TryGetValue(obj, "color", &color))
+    if (JSON::TryGetValue(obj, "color", &color))
     {
       Logger.Info("Color: %d", color);
     }
 
     Matrix::SetText(static_cast<uint16_t>(color), text);
+
+    obj["type"] = "text";
+    Cache::SetJsonObject(obj, "/spiffs/content.json");
   });
 
   MQTT::AddTopicHandler("matrix/image", [](const JsonObject& obj) {
-    Logger.Info("Image");
-    // Need to set image
     // TODO: This needs update -> we can scale..
     uint16_t* image = new uint16_t[16 * 16];
-    if (TryGetUInt16Array(obj, "payload", image, 16 * 16))
+    if (JSON::TryGetUInt16Array(obj, "payload", image, 16 * 16))
     {
       Logger.Info("Image: %d", image);
       Matrix::SetImage(image);
+      obj["type"] = "image";
+      Cache::SetJsonObject(obj, "/spiffs/content.json");
     }
   });
 
