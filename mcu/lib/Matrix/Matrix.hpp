@@ -119,10 +119,10 @@ namespace Matrix
     void Begin(const std::function<JsonObject(const char*)> getCache)
     {
         JsonObject scale = getCache("/spiffs/scale.json");
-        uint16_t width, height;
+        int width, height;
         if (JSON::TryGetValue(scale, "width", &width) && JSON::TryGetValue(scale, "height", &height))
         {
-            Scale(width, height);
+            Scale(static_cast<uint16_t>(width), static_cast<uint16_t>(height));
         }
         else
         {
@@ -136,10 +136,10 @@ namespace Matrix
             if (strcmp(type, "text") == 0)
             {
                 char text[512];
-                uint16_t color;
+                int color;
                 if (JSON::TryGetString(content, "payload", text, 512) && JSON::TryGetValue(content, "color", &color))
                 {
-                    SetText(color, text);
+                    SetText(static_cast<uint16_t>(color), text);
                 }
             }
             else if (strcmp(type, "image") == 0)
