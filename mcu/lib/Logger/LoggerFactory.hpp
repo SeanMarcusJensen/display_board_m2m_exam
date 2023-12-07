@@ -9,10 +9,9 @@
 class LoggerFactory
 {
 public:
-    template <class T>
-    static std::shared_ptr<ILogger> Create(T name)
+    static std::shared_ptr<ILogger> Create(String name)
     {
-        return std::make_shared<SerialLogger>(typeid(T).name());
+        return std::make_shared<SerialLogger>(name);
     }
 };
 

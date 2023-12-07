@@ -33,7 +33,7 @@ public:
     Text(uint16_t color, const char* format, ...)
         : _color(color), _x(0), _y(0)
     {
-        _logger = LoggerFactory::Create(this);
+        _logger = LoggerFactory::Create("Text");
 
         _text = new char[512];
 

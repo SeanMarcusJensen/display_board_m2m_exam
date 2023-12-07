@@ -1,15 +1,16 @@
 #ifndef MQTT_HPP
 #define MQTT_HPP 
 
+#include <Arduino.h>
 #include <map>
 #include <functional>
 #include <ArduinoJson.h>
 #include <LoggerFactory.hpp>
 #include <SerialLogger.h>
+#include <PubSubClient.h>
 
 #include <secrets.h>
 
-#include <cstring>
 
 namespace
 {
@@ -26,7 +27,7 @@ namespace
             return;
         }
 
-          JsonObject obj = _doc.as<JsonObject>(); // Get the JsonObject from the JsonDocument.
+        JsonObject obj = _doc.as<JsonObject>();
 
         for (auto& kv : _handlers)
         {

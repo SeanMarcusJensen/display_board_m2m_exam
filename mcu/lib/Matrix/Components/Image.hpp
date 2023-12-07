@@ -17,7 +17,7 @@ private:
 public:
     Image(uint16_t width, uint16_t height, uint16_t* image)
     {
-        _logger = LoggerFactory::Create(this);
+        _logger = LoggerFactory::Create("Image");
         _width = width;
         _height = height;
         _image = new uint16_t[width * height];
