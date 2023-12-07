@@ -52,7 +52,7 @@ void setup() {
     if (JSON::TryGetValue(obj, "width", &width) && JSON::TryGetValue(obj, "height", &height))
     {
       Matrix::Scale(width, height);
-      Cache::SetJsonObject(obj, "/spiffs/scale.json");
+      Cache::SetJsonObject(obj, "/scale.json");
     }
   });
 
@@ -74,7 +74,7 @@ void setup() {
     Matrix::SetText(static_cast<uint16_t>(color), text);
 
     obj["type"] = "text";
-    Cache::SetJsonObject(obj, "/spiffs/content.json");
+    Cache::SetJsonObject(obj, "/content.json");
   });
 
   MQTT::AddTopicHandler("matrix/image", [](const JsonObject& obj) {
@@ -85,7 +85,7 @@ void setup() {
       Logger.Info("Image: %d", image);
       Matrix::SetImage(image);
       obj["type"] = "image";
-      Cache::SetJsonObject(obj, "/spiffs/content.json");
+      Cache::SetJsonObject(obj, "/content.json");
     }
   });
 
