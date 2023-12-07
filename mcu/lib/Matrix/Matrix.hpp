@@ -35,6 +35,16 @@ public:
         _logger = LoggerFactory::Create(this);
     }
 
+    uint16_t Width() const
+    {
+        return _matrix->width();
+    }
+
+    uint16_t Height() const
+    {
+        return _matrix->height();
+    }
+
     void Begin()
     {
         _matrix->begin();
@@ -45,8 +55,9 @@ public:
     void SetMatrix(std::unique_ptr<Adafruit_NeoMatrix> matrix)
     {
         _logger->Trace("Setting matrix");
-        _matrix = std::move(matrix);
+        _matrix.swap(matrix);
         Begin();
+        _renderable->Configure(_matrix);
     }
 
     void SetRenderable(std::unique_ptr<IRenderedComponent> renderable)
@@ -71,7 +82,6 @@ public:
     }
 };
 
-
 namespace
 {
     // TODO: Change at runtime for size.
@@ -84,6 +94,15 @@ namespace
 
 namespace Matrix
 {
+    void Scale(const uint16_t& width, const uint16_t& height)
+    {
+        myMatrix.SetMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
+            width, height, PIN,
+            NEO_MATRIX_TOP + NEO_MATRIX_RIGHT +
+            NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
+            NEO_GRB + NEO_KHZ800)));
+    }
+
     void SetText(const uint16_t color, const char* component)
     {
         myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(color, component)));
@@ -91,7 +110,7 @@ namespace Matrix
 
     void SetImage(uint16_t* image)
     {
-        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Image(16, 16, image)));
+        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Image(myMatrix.Width(), myMatrix.Height(), image)));
     }
 
     void Begin()
