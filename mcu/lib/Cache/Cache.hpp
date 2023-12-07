@@ -12,6 +12,12 @@ namespace Cache
 {
     JsonObject GetJsonObject(const char* path)
     {
+        if (!SPIFFS.exists(path))
+        {
+            Serial.println("File does not exist");
+            return JsonObject();
+        }
+
         File file = SPIFFS.open(path);
         if (!file)
         {
@@ -19,29 +25,36 @@ namespace Cache
             return JsonObject();
         }
 
-        size_t size = file.size();
-        if (size > 1024)
-        {
-            Serial.println("File size is too large");
-            return JsonObject();
-        }
-
-        std::unique_ptr<char[]> buf(new char[size]);
-        file.readBytes(buf.get(), size);
-
-        StaticJsonDocument<1024> doc;
-        DeserializationError error = deserializeJson(doc, buf.get());
+        Logger.Trace("Parsing file");
+        DynamicJsonDocument doc(8196);
+        DeserializationError error = deserializeJson(doc, file);
         if (error)
         {
             Serial.println("Failed to parse file");
             return JsonObject();
         }
 
+        serializeJsonPretty(doc, Serial);
+
+        file.close();
+        Logger.Trace("Parsed file");
         return doc.as<JsonObject>();
     }
 
     bool SetJsonObject(JsonObject obj, const char* path)
     {
+        if (obj.isNull())
+        {
+            Logger.Debug("Object is null");
+            return true;
+        }
+
+        if (!SPIFFS.exists(path))
+        {
+            Serial.println("File does not exist");
+            return false;
+        }
+
         File file = SPIFFS.open(path, FILE_WRITE);
         if (!file)
         {
