@@ -40,7 +40,6 @@ void setup() {
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  // TODO: Need to do this non-blocking
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
     Logger.Info("Connecting to WiFi..");
@@ -78,9 +77,10 @@ void setup() {
   });
 
   MQTT::AddTopicHandler("matrix/image", [](const JsonObject& obj) {
-    // TODO: This needs update -> we can scale..
-    uint16_t* image = new uint16_t[16 * 16];
-    if (JSON::TryGetUInt16Array(obj, "payload", image, 16 * 16))
+    uint16_t width, height;
+    Matrix::GetScale(&width, &height);
+    uint16_t* image = new uint16_t[width * height];
+    if (JSON::TryGetUInt16Array(obj, "payload", image, width * height))
     {
       Logger.Info("Image: %d", image);
       Matrix::SetImage(image);
@@ -89,12 +89,21 @@ void setup() {
     }
   });
 
-  // TODO: Setup MQTT
   MQTT::Connect(espClient, "matrix/+");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  MQTT::Loop();
+  // Need to run regardless of MQTT connection.
   Matrix::Loop();
+
+  if (MQTT::IsConnected())
+  {
+    MQTT::Loop();
+  }
+  else
+  {
+    Logger.Info("MQTT Disconnected");
+    // TODO: Add reconnect logic
+    MQTT::Connect(espClient, "matrix/+");
+  }
 }

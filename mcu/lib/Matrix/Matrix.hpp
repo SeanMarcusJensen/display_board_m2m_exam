@@ -90,16 +90,19 @@ public:
 
 namespace
 {
-    // TODO: Change at runtime for size.
     LedMatrix myMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
         16, 16, PIN,
         NEO_MATRIX_TOP + NEO_MATRIX_RIGHT +
         NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
         NEO_GRB + NEO_KHZ800)));
+
+    static unsigned long lastMillis = 0;
+    static unsigned long matrixMillis = 100;
 }
 
 namespace Matrix
 {
+    // TODO: Should add scale limit, as it could be too big for the device to handle
     void Scale(const uint16_t width, const uint16_t height)
     {
         myMatrix.SetMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
@@ -107,6 +110,12 @@ namespace Matrix
             NEO_MATRIX_TOP + NEO_MATRIX_RIGHT +
             NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
             NEO_GRB + NEO_KHZ800)));
+    }
+
+    void GetScale(uint16_t* width, uint16_t* height)
+    {
+        *width = myMatrix.Width();
+        *height = myMatrix.Height();
     }
 
     void SetText(const uint16_t color, const char* component)
@@ -167,8 +176,11 @@ namespace Matrix
     }
 
     void Loop() {
+        // Run every 100ms
+        if (millis() - lastMillis < matrixMillis) return;
+        lastMillis = millis();
+
         myMatrix.Loop();
-        delay(100); // TODO: Move to non blocking timer.
     }
 }
 
