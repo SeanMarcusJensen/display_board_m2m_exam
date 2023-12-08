@@ -16,10 +16,10 @@ namespace
 {
     std::unique_ptr<PubSubClient> client;
     std::map<String, std::function<void(const JsonObject&)>> _handlers;
-    StaticJsonDocument<8192> _doc;
 
     void HandleMessage(const char* topic, byte* payload, unsigned int length)
     {
+        DynamicJsonDocument _doc(8192);
         DeserializationError error = deserializeJson(_doc, payload, length); // Parse the payload
         if (error)
         {
@@ -72,7 +72,7 @@ namespace MQTT
 
     bool IsConnected()
     {
-        return false;
+        return client->connected();
     }
 
     void AddTopicHandler(String topic, std::function<void(const JsonObject&)> callback)
