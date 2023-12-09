@@ -13,7 +13,7 @@ export function ValidateMatrixConfig(config: MatrixConfig) : boolean {
 }
 
 export function ValidateBrokerConfig(config: BrokerConfig) : boolean {
-    if (config.brokerScheme !== 'http://' && config.brokerScheme !== 'https://') {
+    if (config.brokerScheme !== 'ws://' && config.brokerScheme !== 'wss://' && config.brokerScheme !== 'http://' && config.brokerScheme !== 'https') {
         return false;
     }
 

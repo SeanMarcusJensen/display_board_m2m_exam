@@ -38,6 +38,8 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
             }} />
 
             <VStack style={{'gap': 10, 'marginBottom': 15}}>
+              <VStack style={{'gap': 5, width: '50%', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Text style={{ alignSelf: 'center' }}>Width:</Text>
                 <TextInput
                     value={props.matrix.width.toString() ?? "16"}
                     onChangeText={value => props.SetConfig('width', Number(value))}
@@ -47,9 +49,12 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                     ...styles.textInput,
                     color: Colors[colorScheme ?? 'light'].text,
                     borderColor: Colors[colorScheme ?? 'light'].tint,
-                    width: '50%',
+                    width: '80%',
                     }}/>
+              </VStack>
 
+              <VStack style={{'gap': 5, width: '50%', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Text style={{ alignSelf: 'center' }}>Height:</Text>
                 <TextInput
                     value={props.matrix.height.toString() ?? "16" }
                     onChangeText={value => props.SetConfig('height', Number(value))}
@@ -60,8 +65,9 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                     ...styles.textInput,
                     color: Colors[colorScheme ?? 'light'].text,
                     borderColor: Colors[colorScheme ?? 'light'].tint,
-                    width: '50%'
+                    width: '80%'
                     }} />
+              </VStack>
             </VStack>
           </HStack>
         </SafeAreaView>
