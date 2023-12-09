@@ -1,6 +1,6 @@
 import { SafeAreaView, Pressable, StyleSheet, useColorScheme } from 'react-native';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { Text, View } from '../../components/Themed';
 import Colors from '../../constants/Colors';
@@ -8,10 +8,12 @@ import { SignboardConfig } from '../../types/MatrixConfig';
 import MQTTConfiguration from '../../components/MQTTConfiguration';
 import MatrixConfiguration from '../../components/MatrixConfiguration';
 
+import { StoreConfigAsync } from '../../services/SignboardRepository';
+import { ValidateSignboardConfig } from '../../services/Validators/SignboardValidator';
+
 export default function RegisterScreen() {
   const colorScheme = useColorScheme();
-
-  const [matrixConfig, setMatrixConfig] = useState<SignboardConfig>({
+  const [matrix, setMatrixConfig] = useState<SignboardConfig>({
     width: 16,
     height: 16,
     brokerPort: 8883,
@@ -20,26 +22,31 @@ export default function RegisterScreen() {
 
   function SetConfig<T extends keyof SignboardConfig>(key: T, value: SignboardConfig[T]) {
     setMatrixConfig(prev => ({...prev, [key]: value}));
-    console.log("MatrixConfig: ", matrixConfig);
-    console.log(matrixConfig);
+    console.log("MatrixConfig: ", matrix);
+    console.log(matrix);
+  }
+
+  async function RegisterConfig() {
+     if (ValidateSignboardConfig(matrix)){
+      console.log("Config is valid")
+      console.log(matrix);
+      await StoreConfigAsync(matrix, (e) => { console.log(e) });
+    } else {
+      console.log("Config is invalid")
+    }
   }
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
-      <>
-        <Text style={styles.title}>Matrix</Text>
-        <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      </>
       {/* REGISTRATION */}
       <SafeAreaView style={{ width: '80%'}}>
 
         <MatrixConfiguration
-          matrix={matrixConfig}
+          matrix={matrix}
           SetConfig={SetConfig} />
 
         <MQTTConfiguration
-          brokerConfig={matrixConfig}
+          brokerConfig={matrix}
           SetConfig={SetConfig} />
 
         <Pressable
@@ -50,7 +57,9 @@ export default function RegisterScreen() {
             alignItems: 'center',
           }}
           onPress={() => {
-            // Handle button press
+            RegisterConfig()
+            .then(() => console.log("Registered"))
+            .catch((e) => console.log(`Failed to register: ${e}`));
           }}
         >
           <Text

@@ -29,8 +29,9 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
                 <VStack style={{ 'gap': 5 }}>
                     <TextInput
                     value={props.brokerConfig.brokerScheme}
-                    onChangeText={value => props.SetConfig('brokerUrl', value)}
+                    onChangeText={value => props.SetConfig('brokerScheme', value)}
                     keyboardAppearance={colorScheme ?? 'light'}
+                    inputMode='text'
                     style={{
                         ...styles.textInput,
                         color: Colors[colorScheme ?? 'light'].text,
@@ -42,7 +43,7 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
 
                     <TextInput
                     placeholder="Broker URL"
-                    keyboardType='url'
+                    inputMode='url'
                     onChangeText={value => props.SetConfig('brokerUrl', value)}
                     keyboardAppearance={colorScheme ?? 'light'}
                     style={{
@@ -54,7 +55,7 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
 
                     <TextInput
                     value={props.brokerConfig.brokerPort?.toString()}
-                    keyboardType='numeric'
+                    inputMode='numeric'
                     keyboardAppearance={colorScheme ?? 'light'}
                     onChangeText={value => props.SetConfig('brokerPort', Number(value))}
                     style={{
