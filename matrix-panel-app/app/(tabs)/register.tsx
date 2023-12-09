@@ -4,12 +4,13 @@ import { useState } from 'react';
 
 import { Text, View } from '../../components/Themed';
 import Colors from '../../constants/Colors';
-import { SignboardConfig } from '../../types/MatrixConfig';
+import { MatrixConfig, SignboardConfig } from '../../types/MatrixConfig';
 import MQTTConfiguration from '../../components/MQTTConfiguration';
 import MatrixConfiguration from '../../components/MatrixConfiguration';
 
 import { StoreConfigAsync } from '../../services/SignboardRepository';
 import { ValidateSignboardConfig } from '../../services/Validators/SignboardValidator';
+import MQTTSender from '../../services/MQTTSender';
 
 export default function RegisterScreen() {
   const colorScheme = useColorScheme();
@@ -29,6 +30,9 @@ export default function RegisterScreen() {
       console.log("Config is valid")
       console.log(matrix);
       await StoreConfigAsync(matrix, (e) => { console.log(e) });
+
+      const client = new MQTTSender(matrix);
+      client.SendText(JSON.stringify(matrix as MatrixConfig), 'scale');
     } else {
       console.log("Config is invalid")
     }
