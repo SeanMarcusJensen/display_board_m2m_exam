@@ -19,10 +19,10 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
         <SafeAreaView>
             <HStack>
                 <Text
-                    style={{ 'alignSelf': 'center', fontSize: 20}}
-                    lightColor={Colors[colorScheme ?? 'light'].text}
-                    darkColor={Colors[colorScheme ?? 'dark'].text}
-                    >MQTT</Text>
+                  style={{ 'alignSelf': 'center', fontSize: 20}}
+                  lightColor={Colors[colorScheme ?? 'light'].text}
+                  darkColor={Colors[colorScheme ?? 'dark'].text}
+                  >MQTT</Text>
 
                 <View style={{...styles.separator, marginVertical: 15, width: '100%'}} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
@@ -42,7 +42,7 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
                     }} />
 
                     <TextInput
-                    placeholder="Broker URL"
+                    value={props.brokerConfig.brokerUrl ?? 'Broker URL'}
                     inputMode='url'
                     onChangeText={value => props.SetConfig('brokerUrl', value)}
                     keyboardAppearance={colorScheme ?? 'light'}

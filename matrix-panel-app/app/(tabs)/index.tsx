@@ -1,47 +1,60 @@
-import { StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, Pressable, useColorScheme} from 'react-native';
 import { Text, View } from '../../components/Themed';
 import { useEffect, useState } from 'react';
 import { SignboardConfig } from '../../types/MatrixConfig';
-import { GetAllAsync } from '../../services/SignboardRepository';
+import { GetAllAsync, GetAllKeysAsync } from '../../services/SignboardRepository';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link, Tabs } from 'expo-router';
+import Colors from '../../constants/Colors';
+
+function MatrixItem({matrix}: {matrix: string}){
+  const colorScheme = useColorScheme();
+  return (
+    <Link href={{
+      pathname: '/matrix/[name]',
+      params: {
+        name: matrix
+      }
+    }} asChild>
+      <Pressable
+        style={{ padding: 20, margin: 10, borderRadius: 10, borderWidth: 1, borderColor: '#FFF', backgroundColor: '#123456'}}>
+        <Text
+          style={{alignSelf: 'center', fontSize: 20}}
+          lightColor={Colors[colorScheme ?? 'light'].text}
+          darkColor={Colors[colorScheme ?? 'dark'].text}>
+            {matrix}</Text>
+      </Pressable>
+    </Link>
+  );
+}
 
 export default function HomeScreen() {
   const [isLoading, setLoading] = useState(true);
-  const [matrices, setMatrices] = useState<SignboardConfig[]>([]);
+  const [matrices, setMatrices] = useState<readonly string[]>([]);
 
   useEffect(() => {
     // AsyncStorage.clear();
     const fetchMatrices = async () => {
-      const matricesFromCache= await GetAllAsync((e) => console.error(e));
-
-      console.log(matricesFromCache);
-
+      const matricesFromCache= await GetAllKeysAsync();
       if (matricesFromCache != null && matricesFromCache.length != 0) {
-        console.log("GOT MATRICIES FROM CACHE");
         setMatrices(matricesFromCache);
-      } else {
-        console.log("NO MATRICIES IN CACHE");
       }
     };
 
-      fetchMatrices()
-        .finally(() => setLoading(false));
+    fetchMatrices().finally(() => setLoading(false));
   }, []);
 
   if (!isLoading) {
     if (matrices.length > 0) {
       return (
-        <View style={styles.container}>
-          {/* HEADER */}
-          <>
-            <Text style={styles.title}>Main</Text>
-            <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-          </>
+        <SafeAreaView style={{...styles.container, height: '100%', width:'100%'}}>
+          <FlatList
+            style={{ width: '100%', height: '100%'}}
+            data={matrices}
+            renderItem={(item) => (<MatrixItem matrix={item.item}/>)}
+            keyExtractor={(item) => item}/>
 
-          {/* CONTENT */}
-          <>
-
-          </>
-        </View>
+        </SafeAreaView>
       );
     } else {
       return (

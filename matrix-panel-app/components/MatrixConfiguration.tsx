@@ -22,12 +22,12 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
               style={{ 'alignSelf': 'center', fontSize: 20}}
               lightColor={Colors[colorScheme ?? 'light'].text}
               darkColor={Colors[colorScheme ?? 'dark'].text}
-              >Matrix</Text>
+              >{props.matrix.name ?? "Matrix"}</Text>
 
             <View style={{...styles.separator, marginVertical: 15, width: '100%'}} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
             <TextInput
-            placeholder="Name"
+            value={props.matrix.name ?? "Name"}
             inputMode='text'
             keyboardAppearance={colorScheme ?? 'light'}
             onChangeText={value => props.SetConfig('name', value)}
@@ -39,7 +39,7 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
 
             <VStack style={{'gap': 10, 'marginBottom': 15}}>
                 <TextInput
-                    placeholder="Matrix Width"
+                    value={props.matrix.width.toString() ?? "16"}
                     onChangeText={value => props.SetConfig('width', Number(value))}
                     inputMode='numeric'
                     keyboardAppearance={colorScheme ?? 'light'}
@@ -51,7 +51,7 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                     }}/>
 
                 <TextInput
-                    placeholder="Matrix Height"
+                    value={props.matrix.height.toString() ?? "16" }
                     onChangeText={value => props.SetConfig('height', Number(value))}
                     keyboardType='numeric'
                     inputMode='numeric'

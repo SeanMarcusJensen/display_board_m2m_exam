@@ -22,8 +22,6 @@ export default function RegisterScreen() {
 
   function SetConfig<T extends keyof SignboardConfig>(key: T, value: SignboardConfig[T]) {
     setMatrixConfig(prev => ({...prev, [key]: value}));
-    console.log("MatrixConfig: ", matrix);
-    console.log(matrix);
   }
 
   async function RegisterConfig() {
