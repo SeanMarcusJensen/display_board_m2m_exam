@@ -14,16 +14,14 @@ export default class MQTTSender {
         this.options = {
             onSuccess: () => {console.log("Connected")},
             onFailure: (e) => {console.log(`Failed to connect: ${e}`)},
+            userName: matrix.brokerUsername,
+            password: matrix.brokerPassword,
+            useSSL: true,
         }
     }
 
     public Connect() {
-        this.client.connect(
-            {...this.options,
-            useSSL: true,
-            userName: 'jensen',
-            password: 'testpassword',
-        });
+        this.client.connect(this.options);
     }
 
     public IsConnected() {

@@ -11,4 +11,6 @@ export interface BrokerConfig {
   brokerScheme: string;
   brokerUrl: string;
   brokerPort: number;
+  brokerUsername: string;
+  brokerPassword: string;
 }

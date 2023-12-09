@@ -68,6 +68,28 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
                     }} />
 
                 </VStack>
+                <TextInput
+                value={props.brokerConfig.brokerUsername?.toString()?? "Username"}
+                inputMode='numeric'
+                keyboardAppearance={colorScheme ?? 'light'}
+                onChangeText={value => props.SetConfig('brokerUsername', value)}
+                style={{
+                    ...styles.textInput,
+                    color: Colors[colorScheme ?? 'light'].text,
+                    borderColor: Colors[colorScheme ?? 'light'].tint,
+                }} />
+
+                <TextInput
+                value={props.brokerConfig.brokerPassword?.toString()??"Password"}
+                inputMode='text'
+                keyboardAppearance={colorScheme ?? 'light'}
+                onChangeText={value => props.SetConfig('brokerPassword', value)}
+                style={{
+                    ...styles.textInput,
+                    color: Colors[colorScheme ?? 'light'].text,
+                    borderColor: Colors[colorScheme ?? 'light'].tint,
+                }} />
+
             </HStack>
         </SafeAreaView>
     );
