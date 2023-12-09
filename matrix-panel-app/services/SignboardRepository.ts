@@ -29,7 +29,22 @@ export const GetConfigAsync = async (name: string, onError: (e: unknown) => void
     }
 }
 
-export const GetAllAsync = async (onError: (e: unknown) => void) : Promise<SignboardConfig[] | undefined> => {
+export const GetAllKeysAsync = async() : Promise<readonly string[]> => {
+    try{
+        const keys = await AsyncStorage.getAllKeys();
+        const configs: string[] = [];
+        await Promise.all(keys.map(async (key) => {
+            if (key.startsWith(CONFIG_KEY)) {
+                configs.push(key.substring(CONFIG_KEY.length));
+            }
+        }));
+        return configs;
+    } catch(e) {
+        return [];
+    }
+}
+
+export const GetAllAsync = async (onError: (e: unknown) => void) : Promise<SignboardConfig[]> => {
     try {
         const configurations: SignboardConfig[] = [];
         const keys = await AsyncStorage.getAllKeys();
@@ -50,6 +65,6 @@ export const GetAllAsync = async (onError: (e: unknown) => void) : Promise<Signb
         return configurations;
     } catch (e) {
         onError(e);
-        return undefined;
+        return [];
     }
 }
