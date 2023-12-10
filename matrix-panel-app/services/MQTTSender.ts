@@ -1,5 +1,5 @@
 import { SignboardConfig } from "../types/MatrixConfig";
-import Paho from "paho-mqtt";
+import Paho, { TypedArray } from "paho-mqtt";
 
 export default class MQTTSender {
     private client: Paho.Client;
@@ -41,7 +41,18 @@ export default class MQTTSender {
     }
 
     // TODO: SendImage sends an image to the matrix Uint16Array
-    public SendImage(image: Uint16Array, topic: string) {
+    public SendImage(image: number[], topic: string) {
+        console.log("SENDING IMAGE");
+        console.log(image);
 
+        const payload = {
+            payload: image,
+        }
+
+        const message = new Paho.Message(JSON.stringify(payload));
+        message.destinationName = this.matrix.name + "/" + topic;
+
+        console.log(message);
+        this.client.send(message);
     }
 }

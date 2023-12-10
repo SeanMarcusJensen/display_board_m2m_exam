@@ -6,6 +6,7 @@ import { TextInput } from "react-native-gesture-handler";
 import Colors from "../../../constants/Colors";
 import ColorPicker, { HueSlider, Panel1, Preview } from "reanimated-color-picker";
 import MQTTSender from "../../../services/MQTTSender";
+import { RGBToRGB565 } from "../services/ImageUtils";
 
 interface MatrixText {
     payload: string;
@@ -13,6 +14,8 @@ interface MatrixText {
 }
 
 export default function SendText({client} :{client: MQTTSender | undefined}) {
+    const colorScheme = useColorScheme();
+
     function Send() {
         console.log("SENDING TEXT");
         console.log(text);
@@ -25,20 +28,10 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
         }
     }
 
-    const colorScheme = useColorScheme();
-    const [toggle, setToggle] = useState(false);
-    const height = toggle ? '40%' : '15%';
     const [text, setText] = useState<MatrixText>({
         payload: 'Not set',
         color: 454545 
     } as MatrixText);
-
-    function rgbToRgb565(red: number, green: number, blue: number): number {
-        let r = red >> 3;
-        let g = green >> 2;
-        let b = blue >> 3;
-        return (r << 11) | (g << 5) | b;
-    }
 
     function SetConfig<T extends keyof MatrixText>(key: T, value: string) {
         console.log(value);
@@ -48,7 +41,7 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
             const r = parseInt(rgbValues[0]);
             const g = parseInt(rgbValues[1]);
             const b = parseInt(rgbValues[2]);
-            const rgb565Color = rgbToRgb565(r, g, b);
+            const rgb565Color = RGBToRGB565(r, g, b);
             console.log(`COLOR: ${rgb565Color}`);
             setText(prev => ({...prev, [key]: rgb565Color}));
         } else {
@@ -57,43 +50,46 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
     }
 
     return(
-        <SafeAreaView style={{...styles.container, height: height}}>
-            <Pressable
-                style={{ width: '80%', borderWidth: 1, borderColor: '#fff'}}
-                onPress={() => setToggle(!toggle)}
-                >
-                <Text>Set Text</Text>
-            </Pressable>
-            {toggle &&
-                <View>
-                    <TextInput
-                        value={text.payload}
-                        inputMode='text'
-                        keyboardAppearance={colorScheme ?? 'light'}
-                        onChangeText={value => SetConfig('payload', value)}
-                        style={{
-                            ...styles.textInput,
-                            color: Colors[colorScheme ?? 'light'].text,
-                            borderColor: Colors[colorScheme ?? 'light'].tint,
-                        }} />
+        <SafeAreaView style={{...styles.container }}>
+            <View>
+                <TextInput
+                    placeholder="Text to send"
+                    inputMode='text'
+                    keyboardAppearance={colorScheme ?? 'light'}
+                    onChangeText={value => SetConfig('payload', value)}
+                    style={{
+                        ...styles.textInput,
+                        color: Colors[colorScheme ?? 'light'].text,
+                        borderColor: Colors[colorScheme ?? 'light'].tint,
+                    }} />
 
-                        <ColorPicker
-                            onChange={value => SetConfig('color', value.rgb)}>
-                            <Preview />
+                <ColorPicker
+                    onChange={value => SetConfig('color', value.rgb)}>
+                    <Preview />
 
-                            <View>
-                                <Panel1 />
-                                <HueSlider />
-                            </View>
+                    <View>
+                        <Panel1 />
+                        <HueSlider />
+                    </View>
 
-                        </ColorPicker>
-                    <Pressable
-                        onPress={Send}
+                </ColorPicker>
+
+                <Pressable
+                    style={{
+                    backgroundColor: Colors[colorScheme ?? 'light'].buttonColor,
+                    padding: 10,
+                    borderRadius: 5,
+                    alignItems: 'center',
+                    }}
+                    onPress={Send}
                     >
-                        <Text>SEND</Text>
-                    </Pressable>
-                </View>
-            }
+                  <Text
+                    style={{fontSize: 16 }}
+                    lightColor={Colors[colorScheme ?? 'light'].buttonText}
+                    darkColor={Colors[colorScheme ?? 'dark'].buttonText}
+                    >Send</Text>
+              </Pressable>
+            </View>
         </SafeAreaView>
     )
 }
@@ -103,7 +99,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    width:'100%'
   },
   title: {
     fontSize: 20,
