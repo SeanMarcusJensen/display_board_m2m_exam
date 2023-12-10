@@ -5,6 +5,7 @@
 #include <WiFi.h>
 
 #include "secrets.h"
+#include "CA_CERT.h"
 #include <cstring>
 
 #include <MQTT.hpp>
@@ -12,11 +13,13 @@
 #include <JsonUtils.hpp>
 #include <FS.h>
 #include <SPIFFS.h>
+#include <WiFiClientSecure.h>
 
 #define SERIAL_LOGGER_BAUD_RATE 115200
 
 
-WiFiClient espClient;
+// WiFiClient espClient;
+WiFiClientSecure espClientSecure;
 
 void setup() {
   SerialLogger::Begin();
@@ -38,6 +41,7 @@ void setup() {
 
   // TODO: ADD WiFiManager
 
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while(WiFi.status() != WL_CONNECTED) {
@@ -45,7 +49,13 @@ void setup() {
     Logger.Info("Connecting to WiFi..");
   }
 
-  MQTT::AddTopicHandler("matrix/scale", [](const JsonObject& obj) {
+  Logger.Info("Setting CACert");
+
+  espClientSecure.setCACert(EMQX_CA_CERT);
+
+  Logger.Info("CACert set");
+
+  MQTT::AddTopicHandler("Test/scale", [](const JsonObject& obj) {
     Logger.Info("Scale");
     uint16_t width, height;
     if (JSON::TryGetValue(obj, "width", &width) && JSON::TryGetValue(obj, "height", &height))
@@ -55,7 +65,7 @@ void setup() {
     }
   });
 
-  MQTT::AddTopicHandler("matrix/text", [](const JsonObject& obj) {
+  MQTT::AddTopicHandler("Test/text", [](const JsonObject& obj) {
     Logger.Info("Text");
     char text[512];
 
@@ -76,7 +86,7 @@ void setup() {
     Cache::SetJsonObject(obj, "/content.json");
   });
 
-  MQTT::AddTopicHandler("matrix/image", [](const JsonObject& obj) {
+  MQTT::AddTopicHandler("Test/image", [](const JsonObject& obj) {
     uint16_t width, height;
     Matrix::GetScale(&width, &height);
     uint16_t* image = new uint16_t[width * height];
@@ -89,7 +99,7 @@ void setup() {
     }
   });
 
-  MQTT::Connect(espClient, "matrix/+");
+  MQTT::Connect(espClientSecure, "Test/+");
 }
 
 void loop() {
@@ -104,6 +114,6 @@ void loop() {
   {
     Logger.Info("MQTT Disconnected");
     // TODO: Add reconnect logic
-    MQTT::Connect(espClient, "matrix/+");
+    MQTT::Connect(espClientSecure, "Test/+");
   }
 }

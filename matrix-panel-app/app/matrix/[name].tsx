@@ -23,8 +23,16 @@ const Info = (props: InfoProps) => {
   const colorScheme = useColorScheme();
   return (
     <View style={{ width: '80%'}}>
-      <MatrixConfiguration matrix={props.matrix} SetConfig={props.SetConfig} />
-      <MQTTConfiguration brokerConfig={props.matrix} SetConfig={props.SetConfig} />
+
+      <MatrixConfiguration
+        matrix={props.matrix}
+        locked={['name']}
+        SetConfig={props.SetConfig} />
+
+      <MQTTConfiguration
+        brokerConfig={props.matrix}
+        SetConfig={props.SetConfig} />
+
        <Pressable
           style={{
             backgroundColor: Colors[colorScheme ?? 'light'].buttonColor,
@@ -65,7 +73,9 @@ export default function MatrixInfo() {
       console.log(matrix);
       await StoreConfigAsync(matrix, (e) => { console.log(e) });
       if (client?.IsConnected()){
-        client.SendText(JSON.stringify(matrix as MatrixConfig), 'scale');
+        const { name, width, height } = matrix;
+        const config = { name, width, height } as MatrixConfig;
+        client.SendText(config, 'scale');
       }
     } else {
       console.log("Config is invalid")

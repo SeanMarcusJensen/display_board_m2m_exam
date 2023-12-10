@@ -13,4 +13,5 @@ export interface BrokerConfig {
   brokerPort: number;
   brokerUsername: string;
   brokerPassword: string;
+  useSSL: boolean;
 }

@@ -42,7 +42,7 @@ namespace
 
 namespace MQTT 
 {
-    bool Connect(WiFiClient& espClient, String topic)
+    bool Connect(Client& espClient, String topic)
     {
         client = std::unique_ptr<PubSubClient>(new PubSubClient(espClient));
         client->setBufferSize(4096);
@@ -53,7 +53,7 @@ namespace MQTT
             Logger.Info("Connecting to MQTT...");
             String client_id = "esp32-client-";
             client_id += String(WiFi.macAddress());
-            if (client->connect(client_id.c_str())) {
+            if (client->connect(client_id.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
                 Logger.Info("connected");
             } else {
                 Logger.Info("failed with state %d", client->state());
@@ -61,7 +61,7 @@ namespace MQTT
             }
         }
 
-        client->subscribe("matrix/+");
+        client->subscribe(topic.c_str());
         return true;
     }
 

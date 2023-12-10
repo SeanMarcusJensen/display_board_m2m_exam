@@ -8,7 +8,7 @@ export default class MQTTSender {
     constructor(private matrix: SignboardConfig) {
         this.client = new Paho.Client(
             `${matrix.brokerScheme}${matrix.brokerUrl}:${matrix.brokerPort}/mqtt`,
-            "client"
+            "client_id" + Math.random().toString(16)
         );
 
         this.options = {
@@ -30,12 +30,18 @@ export default class MQTTSender {
         return connected;
     }
 
-    public SendText(text: string, topic: string) {
+    // TODO: Sends text to the matrix as JSON
+    public SendText<T>(object: T, topic: string) {
         console.log("SENDING TEXT");
-        console.log(text);
-        const message = new Paho.Message(JSON.stringify(text));
-        message.destinationName = 'matrix/' + this.matrix.name + "/" + topic;
+        console.log(object);
+        const message = new Paho.Message(JSON.stringify(object));
+        message.destinationName = this.matrix.name + "/" + topic;
         console.log(message);
         this.client.send(message);
+    }
+
+    // TODO: SendImage sends an image to the matrix Uint16Array
+    public SendImage(image: Uint16Array, topic: string) {
+
     }
 }

@@ -5,11 +5,10 @@ import { useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import Colors from "../../../constants/Colors";
 import ColorPicker, { HueSlider, Panel1, Preview } from "reanimated-color-picker";
-import { SignboardConfig } from "../../../types/MatrixConfig";
 import MQTTSender from "../../../services/MQTTSender";
 
 interface MatrixText {
-    text: string;
+    payload: string;
     color: number;
 }
 
@@ -20,7 +19,7 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
         if (client != undefined)
         {
             console.log("Clinet ok");
-            client.SendText(JSON.stringify(text), 'text');
+            client.SendText(text, 'text');
         } else {
             console.log("Client not ok");
         }
@@ -30,16 +29,28 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
     const [toggle, setToggle] = useState(false);
     const height = toggle ? '40%' : '15%';
     const [text, setText] = useState<MatrixText>({
-        text: 'Not set',
+        payload: 'Not set',
         color: 454545 
     } as MatrixText);
+
+    function rgbToRgb565(red: number, green: number, blue: number): number {
+        let r = red >> 3;
+        let g = green >> 2;
+        let b = blue >> 3;
+        return (r << 11) | (g << 5) | b;
+    }
 
     function SetConfig<T extends keyof MatrixText>(key: T, value: string) {
         console.log(value);
         if (key === 'color') {
-            const integerColor = parseInt(value.slice(1), 16);
-            console.log(`COLOR: ${integerColor}`);
-            setText(prev => ({...prev, [key]: integerColor}));
+            const rgbValues = value.match(/\d+/g); 
+            if (rgbValues == null) return;
+            const r = parseInt(rgbValues[0]);
+            const g = parseInt(rgbValues[1]);
+            const b = parseInt(rgbValues[2]);
+            const rgb565Color = rgbToRgb565(r, g, b);
+            console.log(`COLOR: ${rgb565Color}`);
+            setText(prev => ({...prev, [key]: rgb565Color}));
         } else {
             setText(prev => ({...prev, [key]: value}));
         }
@@ -56,10 +67,10 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
             {toggle &&
                 <View>
                     <TextInput
-                        value={text.text}
+                        value={text.payload}
                         inputMode='text'
                         keyboardAppearance={colorScheme ?? 'light'}
-                        onChangeText={value => SetConfig('text', value)}
+                        onChangeText={value => SetConfig('payload', value)}
                         style={{
                             ...styles.textInput,
                             color: Colors[colorScheme ?? 'light'].text,
@@ -67,7 +78,7 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
                         }} />
 
                         <ColorPicker
-                            onChange={value => SetConfig('color', value.hex)}>
+                            onChange={value => SetConfig('color', value.rgb)}>
                             <Preview />
 
                             <View>
