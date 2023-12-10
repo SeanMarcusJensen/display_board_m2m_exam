@@ -2,7 +2,6 @@
 #define IMAGE_HPP
 
 #include <Components/IRenderedComponent.h>
-#include <Color.h>
 #include <ILogger.h>
 #include <LoggerFactory.hpp>
 
@@ -48,7 +47,6 @@ public:
         matrix->drawRGBBitmap(0, 0, _image, _width, _height);
         _logger->Trace("Image::Render() DONE");
     }
-
 };
 
 

@@ -1,6 +1,5 @@
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "../../../components/Themed";
-import { Pressable, StyleSheet, Image as ImageComponent, useColorScheme } from "react-native";
+import { Image as ImageComponent, useColorScheme } from "react-native";
 import { useState } from "react";
 import Colors from "../../../constants/Colors";
 import MQTTSender from "../../../services/MQTTSender";
@@ -38,23 +37,29 @@ export default function SendImage({client, matrix} :{client: MQTTSender | undefi
     }
 
     async function SendImage() {
-        if (image == undefined) return;
+        if (image?.uri == undefined) return;
 
-        const maniplulatedImage = await manipulateAsync(image.uri, [{resize: {width: matrix?.width ?? 16, height: matrix?.height ?? 16}}], {compress: 0, format: SaveFormat.JPEG, base64: true})
+        const manipulatedImage = await manipulateAsync(
+            image.uri,
+            [
+                {
+                    resize: {
+                        width: matrix?.width ?? 16,
+                        height: matrix?.height ?? 16
+                    }
+                }
+            ], {
+                compress: 0,
+                format: SaveFormat.JPEG,
+                base64: true
+            })
 
-        if (maniplulatedImage.base64 == undefined) return;
+        if (manipulatedImage.base64 == undefined) return;
 
         Buffer.alloc(image?.fileSize ?? 0);
-        const base64 = Buffer.from(maniplulatedImage?.base64 ?? '', 'base64');
+        const base64 = Buffer.from(manipulatedImage.base64 ?? '', 'base64');
         const selectedImage = await Image.load(base64);
-        // selectedImage.resize({width: matrix?.width ?? 16, height: matrix?.height ?? 16})
-
-        console.log(selectedImage.data);
-
         const pixelArray = selectedImage.getPixelsArray();
-
-        console.log(pixelArray);
-
         const rgb565Array = pixelArray.map(pixel => {
             const r = pixel[0];
             const g = pixel[1];

@@ -16,18 +16,18 @@ namespace
 {
     std::unique_ptr<PubSubClient> client;
     std::map<String, std::function<void(const JsonObject&)>> _handlers;
+    DynamicJsonDocument _mqttDoc(8192);
 
     void HandleMessage(const char* topic, byte* payload, unsigned int length)
     {
-        DynamicJsonDocument _doc(8192);
-        DeserializationError error = deserializeJson(_doc, payload, length); // Parse the payload
+        DeserializationError error = deserializeJson(_mqttDoc, payload, length); // Parse the payload
         if (error)
         {
             Logger.Debug("deserializeJson() failed: %s", error.c_str());
             return;
         }
 
-        JsonObject obj = _doc.as<JsonObject>();
+        JsonObject obj = _mqttDoc.as<JsonObject>();
 
         for (auto& kv : _handlers)
         {
@@ -42,18 +42,18 @@ namespace
 
 namespace MQTT 
 {
-    bool Connect(Client& espClient, String topic)
+    bool Connect(Client& espClient, const String& url, const String& username, const String& password, const String& topic)
     {
         client = std::unique_ptr<PubSubClient>(new PubSubClient(espClient));
         client->setBufferSize(4096);
-        client->setServer(MQTT_BROKER, MQTT_PORT);
+        client->setServer(url.c_str(), MQTT_PORT);
         client->setCallback(HandleMessage);
 
         while (!client->connected()) {
             Logger.Info("Connecting to MQTT...");
             String client_id = "esp32-client-";
             client_id += String(WiFi.macAddress());
-            if (client->connect(client_id.c_str(), MQTT_USERNAME, MQTT_PASSWORD)) {
+            if (client->connect(client_id.c_str(), username.c_str(), password.c_str())) {
                 Logger.Info("connected");
             } else {
                 Logger.Info("failed with state %d", client->state());
