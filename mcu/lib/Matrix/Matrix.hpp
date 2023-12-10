@@ -8,7 +8,6 @@
 #include <ILogger.h>
 #include <LoggerFactory.hpp>
 #include <Components/IRenderedComponent.h>
-#include <Color.h>
 #include <Components/Text.hpp>
 #include <Components/Image.hpp>
 #include <functional>
@@ -102,7 +101,6 @@ namespace
 
 namespace Matrix
 {
-    // TODO: Should add scale limit, as it could be too big for the device to handle
     void Scale(const uint16_t width, const uint16_t height)
     {
         myMatrix.SetMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
@@ -163,7 +161,7 @@ namespace Matrix
             else if (strcmp(type, "image") == 0)
             {
                 Logger.Trace("Getting image");
-                uint16_t* image = new uint16_t[myMatrix.Width() * myMatrix.Height()];
+                uint16_t* image = new uint16_t[myMatrix.Width() * myMatrix.Height() * sizeof(uint16_t)];
                 if (JSON::TryGetUInt16Array(content, "payload", image, myMatrix.Width() * myMatrix.Height()))
                 {
                     Logger.Trace("Setting image");

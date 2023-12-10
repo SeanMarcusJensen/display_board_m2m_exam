@@ -2,7 +2,6 @@
 #define TEXT_HPP
 
 #include <Components/IRenderedComponent.h>
-#include <Color.h>
 #include <ILogger.h>
 #include <LoggerFactory.hpp>
 
@@ -62,7 +61,6 @@ public:
         matrix->print(F(_text));
         _logger->Trace("Text[w(%d), h(%d)]: %s", _textWidth, _textHeight, _text);
         _logger->Trace("Cursor: x(%d), y(%d)", _x, _y);
-        // Scroll text from right to left
         if (--_x <= (_textWidth * -1))
         {
             _logger->Trace("Resetting X");

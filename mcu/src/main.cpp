@@ -14,12 +14,17 @@
 #include <FS.h>
 #include <SPIFFS.h>
 #include <WiFiClientSecure.h>
+#include <WiFiManagement.hpp>
 
 #define SERIAL_LOGGER_BAUD_RATE 115200
 
 
 // WiFiClient espClient;
 WiFiClientSecure espClientSecure;
+String mqttUrl;
+String username;
+String password;
+String matrixName;
 
 void setup() {
   SerialLogger::Begin();
@@ -40,14 +45,12 @@ void setup() {
   Matrix::Begin(Cache::GetJsonObject);
 
   // TODO: ADD WiFiManager
+  WiFiManagement::OpenCredentialPage();
 
-
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  while(WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Logger.Info("Connecting to WiFi..");
-  }
+  mqttUrl = WiFiManagement::ReadPropertyFromFile("MqttURL");
+  username= WiFiManagement::ReadPropertyFromFile("Username");
+  password= WiFiManagement::ReadPropertyFromFile("Password");
+  matrixName = WiFiManagement::ReadPropertyFromFile("MatrixName");
 
   Logger.Info("Setting CACert");
 
@@ -55,7 +58,7 @@ void setup() {
 
   Logger.Info("CACert set");
 
-  MQTT::AddTopicHandler("Test/scale", [](const JsonObject& obj) {
+  MQTT::AddTopicHandler(String(matrixName + "/scale").c_str(), [](const JsonObject& obj) {
     Logger.Info("Scale");
     uint16_t width, height;
     if (JSON::TryGetValue(obj, "width", &width) && JSON::TryGetValue(obj, "height", &height))
@@ -65,7 +68,7 @@ void setup() {
     }
   });
 
-  MQTT::AddTopicHandler("Test/text", [](const JsonObject& obj) {
+  MQTT::AddTopicHandler(String(matrixName + "/text").c_str(), [](const JsonObject& obj) {
     Logger.Info("Text");
     char text[512];
 
@@ -86,7 +89,7 @@ void setup() {
     Cache::SetJsonObject(obj, "/content.json");
   });
 
-  MQTT::AddTopicHandler("Test/image", [](const JsonObject& obj) {
+  MQTT::AddTopicHandler(String(matrixName + "/image").c_str(), [](const JsonObject& obj) {
     uint16_t width, height;
     Matrix::GetScale(&width, &height);
     uint16_t* image = new uint16_t[width * height];
@@ -99,7 +102,12 @@ void setup() {
     }
   });
 
-  MQTT::Connect(espClientSecure, "Test/+");
+  MQTT::Connect(
+    espClientSecure,
+    mqttUrl,
+    username,
+    password,
+    String(matrixName + "/+").c_str());
 }
 
 void loop() {
@@ -114,6 +122,11 @@ void loop() {
   {
     Logger.Info("MQTT Disconnected");
     // TODO: Add reconnect logic
-    MQTT::Connect(espClientSecure, "Test/+");
+    MQTT::Connect(
+      espClientSecure,
+      mqttUrl,
+      username,
+      password,
+      String(matrixName + "/+").c_str());
   }
 }

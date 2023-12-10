@@ -8,6 +8,12 @@
 #include <ArduinoJson.h>
 
 #include <SerialLogger.h>
+
+namespace
+{
+    DynamicJsonDocument _doc(8192);
+}
+
 namespace Cache
 {
     JsonObject GetJsonObject(const char* path)
@@ -26,19 +32,18 @@ namespace Cache
         }
 
         Logger.Trace("Parsing file");
-        DynamicJsonDocument doc(8196);
-        DeserializationError error = deserializeJson(doc, file);
+        DeserializationError error = deserializeJson(_doc, file);
         if (error)
         {
             Serial.println("Failed to parse file");
             return JsonObject();
         }
 
-        serializeJsonPretty(doc, Serial);
+        serializeJsonPretty(_doc, Serial);
 
         file.close();
         Logger.Trace("Parsed file");
-        return doc.as<JsonObject>();
+        return _doc.as<JsonObject>();
     }
 
     bool SetJsonObject(JsonObject obj, const char* path)
