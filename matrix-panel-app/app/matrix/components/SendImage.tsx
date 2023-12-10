@@ -10,6 +10,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { MatrixConfig } from "../../../types/MatrixConfig";
 import { Image } from 'image-js';
 import { RGBToRGB565 } from "../services/ImageUtils";
+import { SaveFormat, manipulateAsync } from "expo-image-manipulator";
+import { Buffer } from 'buffer';
 
 
 export default function SendImage({client, matrix} :{client: MQTTSender | undefined, matrix: MatrixConfig | undefined}) {
@@ -20,10 +22,11 @@ export default function SendImage({client, matrix} :{client: MQTTSender | undefi
     async function PickImage() {
         console.log("PICKING IMAGE");
         let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             aspect: [4, 3],
             quality: 0,
+            base64: true
         });
 
         console.log(result);
@@ -35,10 +38,16 @@ export default function SendImage({client, matrix} :{client: MQTTSender | undefi
     }
 
     async function SendImage() {
-        if (image== undefined) return;
+        if (image == undefined) return;
 
-        const selectedImage = await Image.load(image.uri);
-        selectedImage.resize({width: matrix?.width ?? 16, height: matrix?.height ?? 16})
+        const maniplulatedImage = await manipulateAsync(image.uri, [{resize: {width: matrix?.width ?? 16, height: matrix?.height ?? 16}}], {compress: 0, format: SaveFormat.JPEG, base64: true})
+
+        if (maniplulatedImage.base64 == undefined) return;
+
+        Buffer.alloc(image?.fileSize ?? 0);
+        const base64 = Buffer.from(maniplulatedImage?.base64 ?? '', 'base64');
+        const selectedImage = await Image.load(base64);
+        // selectedImage.resize({width: matrix?.width ?? 16, height: matrix?.height ?? 16})
 
         console.log(selectedImage.data);
 
