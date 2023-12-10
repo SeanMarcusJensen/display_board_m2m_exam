@@ -83,6 +83,7 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
                 value={props.brokerConfig.brokerPassword?.toString()??"Password"}
                 inputMode='text'
                 keyboardAppearance={colorScheme ?? 'light'}
+                secureTextEntry={true}
                 onChangeText={value => props.SetConfig('brokerPassword', value)}
                 style={{
                     ...styles.textInput,

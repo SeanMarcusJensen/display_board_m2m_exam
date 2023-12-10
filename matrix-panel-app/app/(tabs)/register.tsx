@@ -17,8 +17,9 @@ export default function RegisterScreen() {
   const [matrix, setMatrixConfig] = useState<SignboardConfig>({
     width: 16,
     height: 16,
-    brokerPort: 8883,
-    brokerScheme: 'https://'
+    brokerPort: 8084,
+    brokerScheme: 'wss://',
+    useSSL: true,
   } as SignboardConfig)
 
   function SetConfig<T extends keyof SignboardConfig>(key: T, value: SignboardConfig[T]) {

@@ -10,6 +10,7 @@ import { Text, View } from './Themed';
 
 export type MatrixConfigProps= {
     matrix: MatrixConfig,
+    locked?: [keyof MatrixConfig],
     SetConfig: <T extends keyof MatrixConfig>(key: T, value: SignboardConfig[T]) => void
 }
 
@@ -27,19 +28,20 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
             <View style={{...styles.separator, marginVertical: 15, width: '100%'}} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
             <TextInput
-            value={props.matrix.name ?? "Name"}
-            inputMode='text'
-            keyboardAppearance={colorScheme ?? 'light'}
-            onChangeText={value => props.SetConfig('name', value)}
-            style={{
-                ...styles.textInput,
-                color: Colors[colorScheme ?? 'light'].text,
-                borderColor: Colors[colorScheme ?? 'light'].tint,
-            }} />
+              value={props.matrix.name ?? "Name"}
+              inputMode='text'
+              editable={!props.locked?.includes('name')}
+              keyboardAppearance={colorScheme ?? 'light'}
+              onChangeText={value => props.SetConfig('name', value)}
+              style={{
+                  ...styles.textInput,
+                  color: Colors[colorScheme ?? 'light'].text,
+                  borderColor: Colors[colorScheme ?? 'light'].tint,
+              }} />
 
             <VStack style={{'gap': 10, 'marginBottom': 15}}>
               <VStack style={{'gap': 5, width: '50%', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Text style={{ alignSelf: 'center' }}>Width:</Text>
+                <Text style={{ alignSelf: 'center', marginBottom: 10 }}>Width:</Text>
                 <TextInput
                     value={props.matrix.width.toString() ?? "16"}
                     onChangeText={value => props.SetConfig('width', Number(value))}
@@ -53,8 +55,23 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                     }}/>
               </VStack>
 
-              <VStack style={{'gap': 5, width: '50%', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Text style={{ alignSelf: 'center' }}>Height:</Text>
+              <VStack style={{width: '50%'}}>
+                <View style={{
+                  borderRightWidth: 0,
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                  borderTopLeftRadius: 5,
+                  borderBottomLeftRadius: 5,
+                  borderColor: Colors[colorScheme ?? 'light'].tint,
+                  borderWidth:1,
+                  justifyContent: 'center',
+                  marginBottom: 10,
+                }}>
+                  <Text style={{
+                    textAlign: 'center',
+                    marginLeft: 15,
+                    alignSelf: 'center'}}>Height:</Text>
+                </View>
                 <TextInput
                     value={props.matrix.height.toString() ?? "16" }
                     onChangeText={value => props.SetConfig('height', Number(value))}
@@ -63,6 +80,9 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                     keyboardAppearance={colorScheme ?? 'light'}
                     style={{
                     ...styles.textInput,
+                    borderLeftWidth: 0,
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
                     color: Colors[colorScheme ?? 'light'].text,
                     borderColor: Colors[colorScheme ?? 'light'].tint,
                     width: '80%'
