@@ -57,22 +57,26 @@ namespace WiFiManagement
 
     bool OpenCredentialPage(unsigned long timeoutInSeconds = 120)
     {
-        _wifiManager.addParameter(&_mqttUserNameParameter);
-        _wifiManager.addParameter(&_mqttPasswordParameter);
-        _wifiManager.addParameter(&_mqttURLParameter);
-        _wifiManager.addParameter(&_mqttTopicParameter);
+        if (!_wifiManager.autoConnect("ESP32-SETUP", "MySecretPassword"))
+        {
+            _wifiManager.addParameter(&_mqttUserNameParameter);
+            _wifiManager.addParameter(&_mqttPasswordParameter);
+            _wifiManager.addParameter(&_mqttURLParameter);
+            _wifiManager.addParameter(&_mqttTopicParameter);
 
-        _wifiManager.setConfigPortalTimeout(timeoutInSeconds); // 3 minutes
+            _wifiManager.setConfigPortalTimeout(timeoutInSeconds); // 3 minutes
 
-        _wifiManager.setSaveConfigCallback([&]() {
-            _configurationJSON[_mqttPassword] = _mqttPasswordParameter.getValue();
-            _configurationJSON[_mqttUserName] = _mqttUserNameParameter.getValue();
-            _configurationJSON[_mqttURL] = _mqttURLParameter.getValue();
-            _configurationJSON[_matrixName] = _mqttTopicParameter.getValue();
-            Cache::SetJsonObject(_configurationJSON.as<JsonObject>(), "/config.json");
-        });
+            _wifiManager.setSaveConfigCallback([&]() {
+                _configurationJSON[_mqttPassword] = _mqttPasswordParameter.getValue();
+                _configurationJSON[_mqttUserName] = _mqttUserNameParameter.getValue();
+                _configurationJSON[_mqttURL] = _mqttURLParameter.getValue();
+                _configurationJSON[_matrixName] = _mqttTopicParameter.getValue();
+                Cache::SetJsonObject(_configurationJSON.as<JsonObject>(), "/config.json");
+            });
 
-        return _wifiManager.startConfigPortal("ESP32-SETUP", "MySecretPassword");
+            return _wifiManager.startConfigPortal("ESP32-SETUP", "MySecretPassword");
+        }
+        return true;
     }
 };
 

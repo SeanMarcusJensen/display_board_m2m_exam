@@ -71,19 +71,40 @@ void setup() {
   MQTT::AddTopicHandler(String(matrixName + "/text").c_str(), [](const JsonObject& obj) {
     Logger.Info("Text");
     char text[512];
-
-    if (JSON::TryGetString(obj, "payload", text, 512))
-    {
-      Logger.Info("Text: %s", text);
-    }
-
     int color;
-    if (JSON::TryGetValue(obj, "color", &color))
+    int speed;
+    int scrollDirection;
+
+    if (!JSON::TryGetString(obj, "payload", text, 512))
     {
-      Logger.Info("Color: %d", color);
+      Logger.Debug("No Payload");
+      return;
     }
 
-    Matrix::SetText(static_cast<uint16_t>(color), text);
+    if (!JSON::TryGetValue(obj, "color", &color))
+    {
+      Logger.Debug("No Color");
+      return;
+    }
+
+    if (!JSON::TryGetValue(obj, "scrollSpeed", &speed))
+    {
+      Logger.Debug("No scrollspeed");
+      return;
+    }
+
+    if (!JSON::TryGetValue(obj, "scrollDirection", &scrollDirection))
+    {
+      Logger.Debug("No scrollDirection");
+      return;
+    }
+
+    Logger.Info("Color: %d", color);
+    Logger.Info("Text: %s", text);
+    Logger.Info("ScrollDirection: %d", scrollDirection);
+    Logger.Info("Speed: %d", speed);
+
+    Matrix::SetText(static_cast<uint16_t>(color), text, speed, scrollDirection);
 
     obj["type"] = "text";
     Cache::SetJsonObject(obj, "/content.json");
@@ -93,13 +114,30 @@ void setup() {
     uint16_t width, height;
     Matrix::GetScale(&width, &height);
     uint16_t* image = new uint16_t[width * height];
-    if (JSON::TryGetUInt16Array(obj, "payload", image, width * height))
+    int speed;
+    int scrollDirection;
+    if (!JSON::TryGetValue(obj, "scrollSpeed", &speed))
     {
-      Logger.Info("Image: %d", image);
-      Matrix::SetImage(image);
-      obj["type"] = "image";
-      Cache::SetJsonObject(obj, "/content.json");
+      return;
     }
+
+    if (!JSON::TryGetValue(obj, "scrollDirection", &scrollDirection))
+    {
+      return;
+    }
+
+    if (!JSON::TryGetUInt16Array(obj, "payload", image, width * height))
+    {
+      return;
+    }
+
+    Logger.Info("ScrollDirection: %d", scrollDirection);
+    Logger.Info("Image: %d", image);
+    Logger.Info("Speed: %d", speed);
+
+    Matrix::SetImage(image, speed, scrollDirection);
+    obj["type"] = "image";
+    Cache::SetJsonObject(obj, "/content.json");
   });
 
   MQTT::Connect(

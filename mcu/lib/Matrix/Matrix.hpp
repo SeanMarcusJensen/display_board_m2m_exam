@@ -13,6 +13,7 @@
 #include <functional>
 #include <ArduinoJson.h>
 #include <JsonUtils.hpp>
+#include <Components/HScroll.hpp>
 
 #ifndef PSTR
 #define PSTR // Make Arduino Due happy
@@ -116,14 +117,40 @@ namespace Matrix
         *height = myMatrix.Height();
     }
 
-    void SetText(const uint16_t color, const char* component)
+    void SetText(const uint16_t color, const char* component, const int8_t speed = 1, const int direction = 0)
     {
-        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(color, component)));
+        ScrollDirection scrollDirection = ScrollDirection::None;
+        try
+        {
+            scrollDirection = static_cast<ScrollDirection>(direction);
+        }
+        catch (...)
+        {
+            scrollDirection = ScrollDirection::None;
+        }
+
+        myMatrix.SetRenderable(
+            HScroll::Create(
+                std::unique_ptr<IRenderedComponent>(new Text(color, component)),
+                speed, scrollDirection));
     }
 
-    void SetImage(uint16_t* image)
+    void SetImage(uint16_t* image, const int8_t speed = 1, const int direction = 0)
     {
-        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Image(myMatrix.Width(), myMatrix.Height(), image)));
+        ScrollDirection scrollDirection = ScrollDirection::None;
+        try
+        {
+            scrollDirection = static_cast<ScrollDirection>(direction);
+        }
+        catch (...)
+        {
+            scrollDirection = ScrollDirection::None;
+        }
+
+        myMatrix.SetRenderable(
+            HScroll::Create(
+                std::unique_ptr<IRenderedComponent>(new Image(myMatrix.Width(), myMatrix.Height(), std::unique_ptr<uint16_t>(image))),
+                speed, scrollDirection));
     }
 
     void Begin(const std::function<JsonObject(const char*)> getCache)
