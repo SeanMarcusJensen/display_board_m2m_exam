@@ -1,9 +1,10 @@
 import { Text, View } from "../../../components/Themed";
-import { Image as ImageComponent, useColorScheme } from "react-native";
+import { Image as ImageComponent, TextInput, useColorScheme, StyleSheet} from "react-native";
 import { useState } from "react";
 import Colors from "../../../constants/Colors";
 import MQTTSender from "../../../services/MQTTSender";
 import Button from "../../../components/Button";
+import { Picker } from '@react-native-picker/picker';
 
 import * as ImagePicker from 'expo-image-picker';
 import { MatrixConfig } from "../../../types/MatrixConfig";
@@ -11,12 +12,15 @@ import { Image } from 'image-js';
 import { RGBToRGB565 } from "../services/ImageUtils";
 import { SaveFormat, manipulateAsync } from "expo-image-manipulator";
 import { Buffer } from 'buffer';
+import { ScrollDirection } from "./ScrollDirection";
 
 
 export default function SendImage({client, matrix} :{client: MQTTSender | undefined, matrix: MatrixConfig | undefined}) {
     const colorScheme = useColorScheme();
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | undefined>(undefined);
     const [ready, setReady] = useState<boolean>(false);
+    const [scrollDirection, setScrollDirection] = useState<ScrollDirection>(ScrollDirection.None);
+    const [scrollSpeed, setScrollSpeed] = useState<number>(1);
 
     async function PickImage() {
         console.log("PICKING IMAGE");
@@ -70,13 +74,37 @@ export default function SendImage({client, matrix} :{client: MQTTSender | undefi
         console.log(rgb565Array);
 
         if (client != undefined) {
-            client.SendImage(rgb565Array, 'image');
+            client.SendAsJson({
+                payload: rgb565Array,
+                scrollDirection: scrollDirection as number,
+                scrollSpeed: scrollSpeed,
+            }, 'image');
         }
     }
 
     return (
         <>
             <Text>Image</Text>
+
+            <TextInput
+                placeholder="Scroll Speed"
+                inputMode='numeric'
+                keyboardAppearance={colorScheme ?? 'light'}
+                onChangeText={value => setScrollSpeed(Number(value))}
+                style={{
+                    ...styles.textInput,
+                    color: Colors[colorScheme ?? 'light'].text,
+                    borderColor: Colors[colorScheme ?? 'light'].tint,
+                }} />
+
+            <Picker
+                selectedValue={scrollDirection}
+                onValueChange={(itemValue, itemIndex) => setScrollDirection(itemValue)}
+            >
+                <Picker.Item label="None" value={ScrollDirection.None} />
+                <Picker.Item label="Left" value={ScrollDirection.Left} />
+                <Picker.Item label="Right" value={ScrollDirection.Right} />
+            </Picker>
 
             { image != undefined &&
                 <View>
@@ -105,3 +133,21 @@ export default function SendImage({client, matrix} :{client: MQTTSender | undefi
         </>
     )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  textInput: {
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10
+  }
+});

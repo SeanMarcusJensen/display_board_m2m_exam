@@ -8,12 +8,7 @@ import ColorPicker, { HueSlider, Panel1, Preview } from "reanimated-color-picker
 import MQTTSender from "../../../services/MQTTSender";
 import { RGBToRGB565 } from "../services/ImageUtils";
 import { Picker } from '@react-native-picker/picker';
-
-enum ScrollDirection {
-    None = 0,
-    Left = 1,
-    Right = 2
-}
+import { ScrollDirection } from "./ScrollDirection";
 
 interface MatrixText {
     payload: string;
@@ -32,7 +27,7 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
         {
             const textToSend: MatrixText = {...text, ['scrollDirection']: scrollDirection};
             console.log("Clinet ok");
-            client.SendText(textToSend, 'text');
+            client.SendAsJson(textToSend, 'text');
         } else {
             console.log("Client not ok");
         }

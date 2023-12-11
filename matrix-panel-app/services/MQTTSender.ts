@@ -31,7 +31,7 @@ export default class MQTTSender {
     }
 
     // TODO: Sends text to the matrix as JSON
-    public SendText<T>(object: T, topic: string) {
+    public SendAsJson<T>(object: T, topic: string) {
         console.log("SENDING TEXT");
         console.log(object);
         const message = new Paho.Message(JSON.stringify(object));
