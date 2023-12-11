@@ -7,10 +7,19 @@ import Colors from "../../../constants/Colors";
 import ColorPicker, { HueSlider, Panel1, Preview } from "reanimated-color-picker";
 import MQTTSender from "../../../services/MQTTSender";
 import { RGBToRGB565 } from "../services/ImageUtils";
+import { Picker } from '@react-native-picker/picker';
+
+enum ScrollDirection {
+    None = 0,
+    Left = 1,
+    Right = 2
+}
 
 interface MatrixText {
     payload: string;
     color: number;
+    scrollDirection: number;
+    scrollSpeed: number;
 }
 
 export default function SendText({client} :{client: MQTTSender | undefined}) {
@@ -21,32 +30,36 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
         console.log(text);
         if (client != undefined)
         {
+            const textToSend: MatrixText = {...text, ['scrollDirection']: scrollDirection};
             console.log("Clinet ok");
-            client.SendText(text, 'text');
+            client.SendText(textToSend, 'text');
         } else {
             console.log("Client not ok");
         }
     }
-
+    const [scrollDirection, setScrollDirection] = useState<ScrollDirection>(ScrollDirection.None);
     const [text, setText] = useState<MatrixText>({
         payload: 'Not set',
-        color: 454545 
+        color: 454545,
+        scrollDirection: 0,
+        scrollSpeed: 1,
     } as MatrixText);
 
-    function SetConfig<T extends keyof MatrixText>(key: T, value: string) {
+    function SetColor(value: string)
+    {
+        const rgbValues = value.match(/\d+/g); 
+        if (rgbValues == null) return;
+        const r = parseInt(rgbValues[0]);
+        const g = parseInt(rgbValues[1]);
+        const b = parseInt(rgbValues[2]);
+        const rgb565Color = RGBToRGB565(r, g, b);
+        console.log(`COLOR: ${rgb565Color}`);
+        setText(prev => ({...prev, ['color']: rgb565Color}));
+    }
+
+    function SetConfig<T extends keyof MatrixText>(key: T, value: MatrixText[T]) {
         console.log(value);
-        if (key === 'color') {
-            const rgbValues = value.match(/\d+/g); 
-            if (rgbValues == null) return;
-            const r = parseInt(rgbValues[0]);
-            const g = parseInt(rgbValues[1]);
-            const b = parseInt(rgbValues[2]);
-            const rgb565Color = RGBToRGB565(r, g, b);
-            console.log(`COLOR: ${rgb565Color}`);
-            setText(prev => ({...prev, [key]: rgb565Color}));
-        } else {
-            setText(prev => ({...prev, [key]: value}));
-        }
+        setText(prev => ({...prev, [key]: value}));
     }
 
     return(
@@ -63,8 +76,28 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
                         borderColor: Colors[colorScheme ?? 'light'].tint,
                     }} />
 
+                <TextInput
+                    placeholder="Scroll Speed"
+                    inputMode='numeric'
+                    keyboardAppearance={colorScheme ?? 'light'}
+                    onChangeText={value => SetConfig('scrollSpeed', Number(value))}
+                    style={{
+                        ...styles.textInput,
+                        color: Colors[colorScheme ?? 'light'].text,
+                        borderColor: Colors[colorScheme ?? 'light'].tint,
+                    }} />
+
+                <Picker
+                    selectedValue={scrollDirection}
+                    onValueChange={(itemValue, itemIndex) => setScrollDirection(itemValue)}
+                >
+                    <Picker.Item label="None" value={ScrollDirection.None} />
+                    <Picker.Item label="Left" value={ScrollDirection.Left} />
+                    <Picker.Item label="Right" value={ScrollDirection.Right} />
+                </Picker>
+
                 <ColorPicker
-                    onChange={value => SetConfig('color', value.rgb)}>
+                    onChange={value => SetColor(value.rgb)}>
                     <Preview />
 
                     <View>

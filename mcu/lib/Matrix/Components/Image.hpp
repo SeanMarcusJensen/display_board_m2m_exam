@@ -9,31 +9,26 @@ class Image : public IRenderedComponent
 {
 private:
     std::shared_ptr<ILogger> _logger; 
-    uint16_t _width;
-    uint16_t _height;
-    uint16_t* _image;
+    std::unique_ptr<uint16_t> _image;
 
 public:
-    Image(uint16_t width, uint16_t height, uint16_t* image)
+    Image(uint16_t width, uint16_t height, std::unique_ptr<uint16_t> image, int16_t x = 0, int16_t y = 0)
+        : IRenderedComponent(width, height, x, y), _image(std::move(image))
     {
         _logger = LoggerFactory::Create("Image");
         _width = width;
         _height = height;
-        _image = new uint16_t[width * height];
-        SetImage(image);
     }
 
     ~Image()
     {
         _logger->Trace("Image::~Image()");
-        delete _image;
     }
 
     void SetImage(uint16_t* image)
     {
         _logger->Trace("Image::SetImage()");
-        delete _image;
-        _image = image;
+        _image = std::unique_ptr<uint16_t>(image);
     }
 
     bool Configure(const std::unique_ptr<Adafruit_NeoMatrix>& matrix) override
@@ -44,7 +39,7 @@ public:
     void Render(const std::unique_ptr<Adafruit_NeoMatrix>& matrix) override
     {
         _logger->Trace("Image::Render()");
-        matrix->drawRGBBitmap(0, 0, _image, _width, _height);
+        matrix->drawRGBBitmap(_x, _y, _image.get(), _width, _height);
         _logger->Trace("Image::Render() DONE");
     }
 };
