@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable, useColorScheme } from 'react-native';
+import { StyleSheet, Pressable, useColorScheme, ScrollView } from 'react-native';
 
 import { Text, View } from '../../components/Themed';
 import { useLocalSearchParams } from 'expo-router';
@@ -38,6 +38,7 @@ export default function MatrixInfo() {
   }
 
   async function SaveConfig() {
+
     if (ValidateSignboardConfig(matrix)){
       console.log("Config is valid")
       console.log(matrix);
@@ -45,7 +46,7 @@ export default function MatrixInfo() {
       if (client?.IsConnected()){
         const { name, width, height } = matrix;
         const config = { name, width, height } as MatrixConfig;
-        client.SendAsJson(config, 'scale');
+        client?.SendAsJson(config, 'scale');
       }
     } else {
       console.log("Config is invalid")
@@ -54,7 +55,9 @@ export default function MatrixInfo() {
 
   useEffect(() => {
     // AsyncStorage.clear();
+    if (name == undefined) return;
     const fetchMatrices = async () => {
+      console.log("Fetching matrices");
       const matricesFromCache= await GetConfigAsync(name as string, (e) => console.error(e));
       if (matricesFromCache != null) {
         setMatrixConfig(matricesFromCache);
@@ -69,6 +72,8 @@ export default function MatrixInfo() {
 
   if (!isLoading) {
     return (
+      <ScrollView>
+
         <View style={styles.container}>
             <View style={{...styles.separator, marginVertical: 15 }} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
             <HStack style={{ width: '100%', gap: 5, alignItems: 'center', justifyContent: 'space-evenly'}}>
@@ -126,6 +131,7 @@ export default function MatrixInfo() {
               {Content[content]}
             </View>
         </View>
+      </ScrollView>
     );
   } else {
     return (

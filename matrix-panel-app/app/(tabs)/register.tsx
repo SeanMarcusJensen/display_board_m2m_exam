@@ -1,4 +1,4 @@
-import { SafeAreaView, Pressable, StyleSheet, useColorScheme } from 'react-native';
+import { SafeAreaView, Pressable, StyleSheet, useColorScheme, ScrollView } from 'react-native';
 
 import { useState } from 'react';
 
@@ -33,46 +33,49 @@ export default function RegisterScreen() {
       await StoreConfigAsync(matrix, (e) => { console.log(e) });
 
       const client = new MQTTSender(matrix);
-      client.SendText(JSON.stringify(matrix as MatrixConfig), 'scale');
+      client.SendAsJson(JSON.stringify(matrix as MatrixConfig), 'scale');
     } else {
       console.log("Config is invalid")
     }
   }
 
   return (
-    <View style={styles.container}>
-      {/* REGISTRATION */}
-      <SafeAreaView style={{ width: '80%'}}>
+    <ScrollView>
 
-        <MatrixConfiguration
-          matrix={matrix}
-          SetConfig={SetConfig} />
+      <View style={styles.container}>
+        {/* REGISTRATION */}
+        <SafeAreaView style={{ width: '80%'}}>
 
-        <MQTTConfiguration
-          brokerConfig={matrix}
-          SetConfig={SetConfig} />
+          <MatrixConfiguration
+            matrix={matrix}
+            SetConfig={SetConfig} />
 
-        <Pressable
-          style={{
-            backgroundColor: Colors[colorScheme ?? 'light'].buttonColor,
-            padding: 10,
-            borderRadius: 5,
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            RegisterConfig()
-            .then(() => console.log("Registered"))
-            .catch((e) => console.log(`Failed to register: ${e}`));
-          }}
-        >
-          <Text
-            style={{fontSize: 16 }}
-            lightColor={Colors[colorScheme ?? 'light'].buttonText}
-            darkColor={Colors[colorScheme ?? 'dark'].buttonText}
-            >Register</Text>
-        </Pressable>
-      </SafeAreaView>
-    </View>
+          <MQTTConfiguration
+            brokerConfig={matrix}
+            SetConfig={SetConfig} />
+
+          <Pressable
+            style={{
+              backgroundColor: Colors[colorScheme ?? 'light'].buttonColor,
+              padding: 10,
+              borderRadius: 5,
+              alignItems: 'center',
+            }}
+            onPress={() => {
+              RegisterConfig()
+              .then(() => console.log("Registered"))
+              .catch((e) => console.log(`Failed to register: ${e}`));
+            }}
+          >
+            <Text
+              style={{fontSize: 16 }}
+              lightColor={Colors[colorScheme ?? 'light'].buttonText}
+              darkColor={Colors[colorScheme ?? 'dark'].buttonText}
+              >Register</Text>
+          </Pressable>
+        </SafeAreaView>
+      </View>
+    </ScrollView>
   );
 }
 

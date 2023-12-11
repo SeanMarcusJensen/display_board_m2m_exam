@@ -208,7 +208,7 @@ namespace Matrix
                 if (JSON::TryGetUInt16Array(content, "payload", image, myMatrix.Width() * myMatrix.Height()))
                 {
                     Logger.Trace("Setting image");
-                    SetImage(image);
+                    SetImage(image, speed, scrollDirection);
                 }
             }
         }
