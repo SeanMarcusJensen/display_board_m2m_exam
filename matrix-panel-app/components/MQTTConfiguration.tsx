@@ -70,7 +70,7 @@ export default function MQTTConfiguration(props: MQTTConfigProps) {
                 </VStack>
                 <TextInput
                 value={props.brokerConfig.brokerUsername?.toString()?? "Username"}
-                inputMode='numeric'
+                inputMode='text'
                 keyboardAppearance={colorScheme ?? 'light'}
                 onChangeText={value => props.SetConfig('brokerUsername', value)}
                 style={{
