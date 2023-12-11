@@ -45,7 +45,7 @@ namespace WiFiManagement
         char* value = new char[101];
         if (JSON::TryGetString(configuration, property.c_str(), value, 101))
         {
-            return configuration[property];
+            return String(value);
         }
         return String();
     }
