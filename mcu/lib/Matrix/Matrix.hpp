@@ -196,6 +196,15 @@ namespace Matrix
             {
                 Logger.Trace("Getting image");
                 uint16_t* image = new uint16_t[myMatrix.Width() * myMatrix.Height() * sizeof(uint16_t)];
+                int speed;
+                int scrollDirection;
+                if (!JSON::TryGetValue(content, "scrollSpeed", &speed) ||
+                    !JSON::TryGetValue(content, "scrollDirection", &scrollDirection))
+                {
+                    speed = 0;
+                    scrollDirection = 0;
+                }
+
                 if (JSON::TryGetUInt16Array(content, "payload", image, myMatrix.Width() * myMatrix.Height()))
                 {
                     Logger.Trace("Setting image");

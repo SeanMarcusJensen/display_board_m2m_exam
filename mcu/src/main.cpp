@@ -118,12 +118,13 @@ void setup() {
     int scrollDirection;
     if (!JSON::TryGetValue(obj, "scrollSpeed", &speed))
     {
-      return;
+      speed = 0;
     }
 
     if (!JSON::TryGetValue(obj, "scrollDirection", &scrollDirection))
     {
-      return;
+      // NONE
+      scrollDirection = 0;
     }
 
     if (!JSON::TryGetUInt16Array(obj, "payload", image, width * height))

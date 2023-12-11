@@ -45,7 +45,7 @@ export default function MatrixInfo() {
       if (client?.IsConnected()){
         const { name, width, height } = matrix;
         const config = { name, width, height } as MatrixConfig;
-        client.SendText(config, 'scale');
+        client.SendAsJson(config, 'scale');
       }
     } else {
       console.log("Config is invalid")
