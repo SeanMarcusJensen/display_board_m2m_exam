@@ -179,10 +179,17 @@ namespace Matrix
                 Logger.Trace("Getting text");
                 char text[512];
                 int color;
-                if (JSON::TryGetString(content, "payload", text, 512) && JSON::TryGetValue(content, "color", &color))
+                int speed;
+                int scrollDirection;
+                if (
+                    JSON::TryGetString(content, "payload", text, 512) &&
+                    JSON::TryGetValue(content, "color", &color) &&
+                    JSON::TryGetValue(content, "scrollSpeed", &speed) &&
+                    JSON::TryGetValue(content, "scrollDirection", &scrollDirection)
+                    )
                 {
                     Logger.Trace("Setting text");
-                    SetText(static_cast<uint16_t>(color), text);
+                    SetText(static_cast<uint16_t>(color), text, speed, scrollDirection);
                 }
             }
             else if (strcmp(type, "image") == 0)
