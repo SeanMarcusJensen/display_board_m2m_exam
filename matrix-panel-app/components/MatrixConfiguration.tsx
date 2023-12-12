@@ -19,7 +19,6 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
     return (
         <SafeAreaView>
           <HStack>
-
             <TextInput
               value={props.matrix.name ?? "Name"}
               inputMode='text'
@@ -28,27 +27,14 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
               onChangeText={value => props.SetConfig('name', value)}
               style={{
                   ...styles.textInput,
+                  width: '90%',
+                  alignSelf: 'center',
                   color: Colors[colorScheme ?? 'light'].text,
                   borderColor: Colors[colorScheme ?? 'light'].tint,
               }} />
 
-            <VStack style={{'gap': 10, 'marginBottom': 15}}>
-              <VStack style={{'gap': 5, width: '50%', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Text style={{ alignSelf: 'center', marginBottom: 10 }}>Width:</Text>
-                <TextInput
-                    value={props.matrix.width.toString() ?? "16"}
-                    onChangeText={value => props.SetConfig('width', Number(value))}
-                    inputMode='numeric'
-                    keyboardAppearance={colorScheme ?? 'light'}
-                    style={{
-                    ...styles.textInput,
-                    color: Colors[colorScheme ?? 'light'].text,
-                    borderColor: Colors[colorScheme ?? 'light'].tint,
-                    width: '80%',
-                    }}/>
-              </VStack>
-
-              <VStack style={{width: '50%'}}>
+            <VStack style={{'gap': 5, 'marginBottom': 15, justifyContent: 'center'}}>
+            <VStack style={{width: '45%'}}>
                 <View style={{
                   borderRightWidth: 0,
                   borderTopRightRadius: 0,
@@ -62,7 +48,41 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                 }}>
                   <Text style={{
                     textAlign: 'center',
-                    marginLeft: 15,
+                    paddingLeft: 15,
+                    alignSelf: 'center'}}>Width:</Text>
+                </View>
+                <TextInput
+                    value={props.matrix.height.toString() ?? "16" }
+                    onChangeText={value => props.SetConfig('width', Number(value))}
+                    keyboardType='numeric'
+                    inputMode='numeric'
+                    keyboardAppearance={colorScheme ?? 'light'}
+                    style={{
+                    ...styles.textInput,
+                    borderLeftWidth: 0,
+                    borderTopLeftRadius: 0,
+                    borderBottomLeftRadius: 0,
+                    color: Colors[colorScheme ?? 'light'].text,
+                    borderColor: Colors[colorScheme ?? 'light'].tint,
+                    width: '60%'
+                    }} />
+              </VStack>
+
+              <VStack style={{width: '45%'}}>
+                <View style={{
+                  borderRightWidth: 0,
+                  borderTopRightRadius: 0,
+                  borderBottomRightRadius: 0,
+                  borderTopLeftRadius: 5,
+                  borderBottomLeftRadius: 5,
+                  borderColor: Colors[colorScheme ?? 'light'].tint,
+                  borderWidth:1,
+                  justifyContent: 'center',
+                  marginBottom: 10,
+                }}>
+                  <Text style={{
+                    textAlign: 'center',
+                    paddingLeft: 15,
                     alignSelf: 'center'}}>Height:</Text>
                 </View>
                 <TextInput
@@ -78,7 +98,7 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
                     borderBottomLeftRadius: 0,
                     color: Colors[colorScheme ?? 'light'].text,
                     borderColor: Colors[colorScheme ?? 'light'].tint,
-                    width: '80%'
+                    width: '60%'
                     }} />
               </VStack>
             </VStack>

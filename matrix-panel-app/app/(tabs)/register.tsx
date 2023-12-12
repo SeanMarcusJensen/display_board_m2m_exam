@@ -44,7 +44,7 @@ export default function RegisterScreen() {
 
       <View style={styles.container}>
         {/* REGISTRATION */}
-        <SafeAreaView style={{ width: '80%'}}>
+        <SafeAreaView style={{ width: '90%'}}>
 
           <MatrixConfiguration
             matrix={matrix}
