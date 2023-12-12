@@ -7,12 +7,13 @@ import MQTTConfiguration from '../../../components/MQTTConfiguration';
 import Colors from '../../../constants/Colors';
 import { MatrixContext } from '../../../providers/MatrixProvider';
 import React from 'react';
+import { ScrollView } from 'react-native-gesture-handler';
+import Button from '../../../components/Button';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function InfoScreen() {
-
   const colorScheme = useColorScheme();
   const context = React.useContext(MatrixContext);
-
   if (context == undefined) throw new Error("Context is undefined");
 
   const { matrix, client, SetConfig, SaveAsync } = context;
@@ -32,8 +33,7 @@ export default function InfoScreen() {
   }
 
   return (
-    <View style={{ width: '100%'}}>
-
+    <ScrollView>
       <MatrixConfiguration
         matrix={matrix}
         locked={['name']}
@@ -43,7 +43,7 @@ export default function InfoScreen() {
         brokerConfig={matrix}
         SetConfig={SetConfig} />
 
-       <Pressable
+       <Button
           style={{
             backgroundColor: Colors[colorScheme ?? 'light'].buttonColor,
             padding: 10,
@@ -57,11 +57,11 @@ export default function InfoScreen() {
           }}
         >
           <Text
-            style={{fontSize: 16 }}
+            style={{fontSize: 16}}
             lightColor={Colors[colorScheme ?? 'light'].buttonText}
             darkColor={Colors[colorScheme ?? 'dark'].buttonText}
             >Save</Text>
-        </Pressable>
-    </View>
+        </Button>
+    </ScrollView>
   );
 }

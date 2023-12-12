@@ -7,6 +7,7 @@ import { Link } from 'expo-router';
 import Colors from '../../constants/Colors';
 import Button from '../../components/Button';
 import { useNavigation } from '@react-navigation/native';
+import { ScrollView } from 'react-native-gesture-handler';
 
 
 function MatrixItem({item} : {item: string}){
@@ -49,11 +50,13 @@ export default function HomeScreen() {
     if (matrices?.length > 0) {
       return (
         <SafeAreaView style={{...styles.container, height: '100%', width:'100%'}}>
-          { matrices.map((item, index) => {
-            return (
-              <MatrixItem item={item} key={index}/>
-            )
-          })}
+          <ScrollView style={{width: '100%' }}>
+            { matrices.map((item, index) => {
+              return (
+                <MatrixItem item={item} key={index}/>
+              )
+            })}
+          </ScrollView>
         </SafeAreaView>
       );
     } else {

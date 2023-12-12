@@ -11,9 +11,9 @@ import { RGBToRGB565 } from "../../../services/ImageUtils";
 import { SaveFormat, manipulateAsync } from "expo-image-manipulator";
 import { Buffer } from 'buffer';
 import { ScrollDirection } from "../../../components/ScrollDirection";
-import { useLocalSearchParams } from "expo-router";
 import React from "react";
 import { MatrixContext } from "../../../providers/MatrixProvider";
+import { ScrollView } from "react-native-gesture-handler";
 
 
 export default function SendImage() {
@@ -21,7 +21,7 @@ export default function SendImage() {
     const context = React.useContext(MatrixContext);
 
     if (context == undefined) throw new Error("Context is undefined");
-    const { matrix, client, SetConfig, SaveAsync } = context;
+    const { matrix, client } = context;
 
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | undefined>(undefined);
     const [ready, setReady] = useState<boolean>(false);
@@ -89,7 +89,7 @@ export default function SendImage() {
     }
 
     return (
-        <>
+        <ScrollView>
             <Text>Image</Text>
 
             <TextInput
@@ -136,7 +136,7 @@ export default function SendImage() {
                     >SendImage</Text>
                 </Button>
             }
-        </>
+        </ScrollView>
     )
 }
 
