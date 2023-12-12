@@ -11,13 +11,12 @@ import { useNavigation } from '@react-navigation/native';
 
 function MatrixItem({item} : {item: string}){
   const colorScheme = useColorScheme();
-  const navigation = useNavigation();
 
   console.log(`MatrixItem: ${item}`);
   return (
-    <Link href={`/matrix/${item}`} asChild>
+    <Link href={`../matrix/${item}`} asChild>
       <Pressable
-        style={{ padding: 20, margin: 10, borderRadius: 10, borderWidth: 1, borderColor: '#FFF', backgroundColor: '#123456'}}>
+        style={{ width: '90%', padding: 20, margin: 10, borderRadius: 10, borderWidth: 1, borderColor: '#FFF', backgroundColor: Colors[colorScheme ?? 'dark'].tint}}>
         <Text
           style={{alignSelf: 'center', fontSize: 20}}
           lightColor={Colors[colorScheme ?? 'light'].text}
@@ -50,11 +49,6 @@ export default function HomeScreen() {
     if (matrices?.length > 0) {
       return (
         <SafeAreaView style={{...styles.container, height: '100%', width:'100%'}}>
-          {/* <FlatList
-            style={{ width: '100%', height: '100%'}}
-            data={matrices}
-            renderItem={(item) => (<MatrixItem matrix={item.item}/>)}
-            keyExtractor={(item) => item}/> */}
           { matrices.map((item, index) => {
             return (
               <MatrixItem item={item} key={index}/>
