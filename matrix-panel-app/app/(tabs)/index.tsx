@@ -14,7 +14,7 @@ function MatrixItem({item} : {item: string}){
 
   console.log(`MatrixItem: ${item}`);
   return (
-    <Link href={`../matrix/${item}`} asChild>
+    <Link href={`../matrix/${item}/Info`} asChild>
       <Pressable
         style={{ width: '90%', padding: 20, margin: 10, borderRadius: 10, borderWidth: 1, borderColor: '#FFF', backgroundColor: Colors[colorScheme ?? 'dark'].tint}}>
         <Text
