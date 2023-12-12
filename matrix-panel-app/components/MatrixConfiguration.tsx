@@ -19,13 +19,6 @@ export default function MatrixConfiguration(props: MatrixConfigProps) {
     return (
         <SafeAreaView>
           <HStack>
-            <Text
-              style={{ 'alignSelf': 'center', fontSize: 20}}
-              lightColor={Colors[colorScheme ?? 'light'].text}
-              darkColor={Colors[colorScheme ?? 'dark'].text}
-              >{props.matrix.name ?? "Matrix"}</Text>
-
-            <View style={{...styles.separator, marginVertical: 15, width: '100%'}} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
 
             <TextInput
               value={props.matrix.name ?? "Name"}

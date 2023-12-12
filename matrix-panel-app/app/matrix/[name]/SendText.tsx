@@ -1,14 +1,16 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "../../../components/Themed";
 import { Pressable, StyleSheet, useColorScheme } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import Colors from "../../../constants/Colors";
 import ColorPicker, { HueSlider, Panel1, Preview } from "reanimated-color-picker";
 import MQTTSender from "../../../services/MQTTSender";
-import { RGBToRGB565 } from "../services/ImageUtils";
+import { RGBToRGB565 } from "../../../services/ImageUtils";
 import { Picker } from '@react-native-picker/picker';
-import { ScrollDirection } from "./ScrollDirection";
+import { ScrollDirection } from "../../../components/ScrollDirection";
+import React from "react";
+import { MatrixContext } from "../../../providers/MatrixProvider";
 
 interface MatrixText {
     payload: string;
@@ -17,21 +19,14 @@ interface MatrixText {
     scrollSpeed: number;
 }
 
-export default function SendText({client} :{client: MQTTSender | undefined}) {
+export default function SendText() {
     const colorScheme = useColorScheme();
 
-    function Send() {
-        console.log("SENDING TEXT");
-        console.log(text);
-        if (client != undefined)
-        {
-            const textToSend: MatrixText = {...text, ['scrollDirection']: scrollDirection};
-            console.log("Clinet ok");
-            client.SendAsJson(textToSend, 'text');
-        } else {
-            console.log("Client not ok");
-        }
-    }
+    const context = React.useContext(MatrixContext);
+    if (context == undefined) throw new Error("Context is undefined");
+
+    const { matrix, client } = context;
+
     const [scrollDirection, setScrollDirection] = useState<ScrollDirection>(ScrollDirection.None);
     const [text, setText] = useState<MatrixText>({
         payload: 'Not set',
@@ -39,6 +34,18 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
         scrollDirection: 0,
         scrollSpeed: 1,
     } as MatrixText);
+
+    function Send() {
+        console.log("SENDING TEXT");
+        console.log(text);
+        if (client != undefined) {
+            const textToSend: MatrixText = {...text, ['scrollDirection']: scrollDirection};
+            console.log("Clinet ok");
+            client.SendAsJson(textToSend, 'text');
+        } else {
+            console.log("Client not ok");
+        }
+    }
 
     function SetColor(value: string)
     {
@@ -59,7 +66,7 @@ export default function SendText({client} :{client: MQTTSender | undefined}) {
 
     return(
         <SafeAreaView style={{...styles.container }}>
-            <View>
+            <View style={{width: '100%'}}>
                 <TextInput
                     placeholder="Text to send"
                     inputMode='text'
@@ -127,6 +134,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%'
   },
   title: {
     fontSize: 20,

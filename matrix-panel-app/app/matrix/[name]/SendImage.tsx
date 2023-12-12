@@ -2,21 +2,27 @@ import { Text, View } from "../../../components/Themed";
 import { Image as ImageComponent, TextInput, useColorScheme, StyleSheet} from "react-native";
 import { useState } from "react";
 import Colors from "../../../constants/Colors";
-import MQTTSender from "../../../services/MQTTSender";
 import Button from "../../../components/Button";
 import { Picker } from '@react-native-picker/picker';
 
 import * as ImagePicker from 'expo-image-picker';
-import { MatrixConfig } from "../../../types/MatrixConfig";
 import { Image } from 'image-js';
-import { RGBToRGB565 } from "../services/ImageUtils";
+import { RGBToRGB565 } from "../../../services/ImageUtils";
 import { SaveFormat, manipulateAsync } from "expo-image-manipulator";
 import { Buffer } from 'buffer';
-import { ScrollDirection } from "./ScrollDirection";
+import { ScrollDirection } from "../../../components/ScrollDirection";
+import { useLocalSearchParams } from "expo-router";
+import React from "react";
+import { MatrixContext } from "../../../providers/MatrixProvider";
 
 
-export default function SendImage({client, matrix} :{client: MQTTSender | undefined, matrix: MatrixConfig | undefined}) {
+export default function SendImage() {
     const colorScheme = useColorScheme();
+    const context = React.useContext(MatrixContext);
+
+    if (context == undefined) throw new Error("Context is undefined");
+    const { matrix, client, SetConfig, SaveAsync } = context;
+
     const [image, setImage] = useState<ImagePicker.ImagePickerAsset | undefined>(undefined);
     const [ready, setReady] = useState<boolean>(false);
     const [scrollDirection, setScrollDirection] = useState<ScrollDirection>(ScrollDirection.None);

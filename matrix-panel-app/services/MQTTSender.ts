@@ -13,7 +13,10 @@ export default class MQTTSender {
 
         this.options = {
             onSuccess: () => {console.log("Connected")},
-            onFailure: (e) => {console.log(`Failed to connect: ${e}`)},
+            onFailure: (e) => {
+                console.log(`Failed to connect to ${matrix.brokerScheme}${matrix.brokerUrl}:${matrix.brokerPort}/mqtt`);
+                console.error(e);
+            },
             userName: matrix.brokerUsername,
             password: matrix.brokerPassword,
             useSSL: true,
