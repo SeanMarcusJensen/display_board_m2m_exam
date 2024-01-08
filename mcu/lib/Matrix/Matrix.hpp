@@ -8,8 +8,12 @@
 #include <ILogger.h>
 #include <LoggerFactory.hpp>
 #include <Components/IRenderedComponent.h>
-#include <Color.h>
 #include <Components/Text.hpp>
+#include <Components/Image.hpp>
+#include <functional>
+#include <ArduinoJson.h>
+#include <JsonUtils.hpp>
+#include <Components/HScroll.hpp>
 
 #ifndef PSTR
 #define PSTR // Make Arduino Due happy
@@ -31,7 +35,17 @@ public:
     LedMatrix(std::unique_ptr<Adafruit_NeoMatrix> matrix)
         : _matrix(std::move(matrix))
     {
-        _logger = LoggerFactory::Create(this);
+        _logger = LoggerFactory::Create("LedMatrix");
+    }
+
+    uint16_t Width() const
+    {
+        return _matrix->width();
+    }
+
+    uint16_t Height() const
+    {
+        return _matrix->height();
     }
 
     void Begin()
@@ -44,8 +58,12 @@ public:
     void SetMatrix(std::unique_ptr<Adafruit_NeoMatrix> matrix)
     {
         _logger->Trace("Setting matrix");
-        _matrix = std::move(matrix);
+        _matrix.swap(matrix);
         Begin();
+        if (_renderable != nullptr)
+        {
+            _renderable->Configure(_matrix);
+        }
     }
 
     void SetRenderable(std::unique_ptr<IRenderedComponent> renderable)
@@ -70,31 +88,140 @@ public:
     }
 };
 
-
 namespace
 {
-    // TODO: Change at runtime for size.
     LedMatrix myMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
         16, 16, PIN,
         NEO_MATRIX_TOP + NEO_MATRIX_RIGHT +
         NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
         NEO_GRB + NEO_KHZ800)));
+
+    static unsigned long lastMillis = 0;
+    static unsigned long matrixMillis = 100;
 }
 
 namespace Matrix
 {
-    void Begin()
+    void Scale(const uint16_t width, const uint16_t height)
     {
-        myMatrix.Begin();
-        myMatrix.SetRenderable(std::unique_ptr<IRenderedComponent>(new Text(Color {255, 0, 0}, "League of Legends")));
+        myMatrix.SetMatrix(std::unique_ptr<Adafruit_NeoMatrix>(new Adafruit_NeoMatrix(
+            width, height, PIN,
+            NEO_MATRIX_TOP + NEO_MATRIX_RIGHT +
+            NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
+            NEO_GRB + NEO_KHZ800)));
     }
 
-    int count = 0;
-    int high = 0;
+    void GetScale(uint16_t* width, uint16_t* height)
+    {
+        *width = myMatrix.Width();
+        *height = myMatrix.Height();
+    }
+
+    void SetText(const uint16_t color, const char* component, const int8_t speed = 1, const int direction = 0)
+    {
+        ScrollDirection scrollDirection = ScrollDirection::None;
+        try
+        {
+            scrollDirection = static_cast<ScrollDirection>(direction);
+        }
+        catch (...)
+        {
+            scrollDirection = ScrollDirection::None;
+        }
+
+        myMatrix.SetRenderable(
+            HScroll::Create(
+                std::unique_ptr<IRenderedComponent>(new Text(color, component)),
+                speed, scrollDirection));
+    }
+
+    void SetImage(uint16_t* image, const int8_t speed = 1, const int direction = 0)
+    {
+        ScrollDirection scrollDirection = ScrollDirection::None;
+        try
+        {
+            scrollDirection = static_cast<ScrollDirection>(direction);
+        }
+        catch (...)
+        {
+            scrollDirection = ScrollDirection::None;
+        }
+
+        myMatrix.SetRenderable(
+            HScroll::Create(
+                std::unique_ptr<IRenderedComponent>(new Image(myMatrix.Width(), myMatrix.Height(), std::unique_ptr<uint16_t>(image))),
+                speed, scrollDirection));
+    }
+
+    void Begin(const std::function<JsonObject(const char*)> getCache)
+    {
+        JsonObject scale = getCache("/scale.json");
+        int width, height;
+        if (JSON::TryGetValue(scale, "width", &width) && JSON::TryGetValue(scale, "height", &height))
+        {
+            Logger.Trace("Scaling to %d x %d", width, height);
+            Scale(static_cast<uint16_t>(width), static_cast<uint16_t>(height));
+        }
+        else
+        {
+            Logger.Trace("Scaling Default");
+            Scale(16, 16);
+        }
+
+        JsonObject content = getCache("/content.json");
+        char type[32];
+        if (JSON::TryGetString(content, "type", type, 32))
+        {
+            Logger.Trace("Getting type %s", type);
+
+            if (strcmp(type, "text") == 0)
+            {
+                Logger.Trace("Getting text");
+                char text[512];
+                int color;
+                int speed;
+                int scrollDirection;
+                if (
+                    JSON::TryGetString(content, "payload", text, 512) &&
+                    JSON::TryGetValue(content, "color", &color) &&
+                    JSON::TryGetValue(content, "scrollSpeed", &speed) &&
+                    JSON::TryGetValue(content, "scrollDirection", &scrollDirection)
+                    )
+                {
+                    Logger.Trace("Setting text");
+                    SetText(static_cast<uint16_t>(color), text, speed, scrollDirection);
+                }
+            }
+            else if (strcmp(type, "image") == 0)
+            {
+                Logger.Trace("Getting image");
+                uint16_t* image = new uint16_t[myMatrix.Width() * myMatrix.Height() * sizeof(uint16_t)];
+                int speed;
+                int scrollDirection;
+                if (!JSON::TryGetValue(content, "scrollSpeed", &speed) ||
+                    !JSON::TryGetValue(content, "scrollDirection", &scrollDirection))
+                {
+                    speed = 0;
+                    scrollDirection = 0;
+                }
+
+                if (JSON::TryGetUInt16Array(content, "payload", image, myMatrix.Width() * myMatrix.Height()))
+                {
+                    Logger.Trace("Setting image");
+                    SetImage(image, speed, scrollDirection);
+                }
+            }
+        }
+
+        myMatrix.Begin();
+    }
+
     void Loop() {
+        // Run every 100ms
+        if (millis() - lastMillis < matrixMillis) return;
+        lastMillis = millis();
+
         myMatrix.Loop();
-        delay(100); // TODO: Move to non blocking timer.
-        count++;
     }
 }
 

@@ -1,0 +1,7 @@
+{
+    "type": "text",
+    "payload": "Hello from spiffs.",
+    "color": 22222,
+    "scrollSpeed": 1,
+    "scrollDirection": 1
+}

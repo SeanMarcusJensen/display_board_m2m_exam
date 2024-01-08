@@ -2,7 +2,6 @@
 #define TEXT_HPP
 
 #include <Components/IRenderedComponent.h>
-#include <Color.h>
 #include <ILogger.h>
 #include <LoggerFactory.hpp>
 
@@ -10,18 +9,14 @@ class Text : public IRenderedComponent
 {
 private:
     char* _text;
-    int32_t _x;
-    int32_t _y;
-    uint16_t _textWidth;
-    uint16_t _textHeight;
-    Color _color;
+    uint16_t _color;
     std::shared_ptr<ILogger> _logger;
 
 private:
     void _calculateTextSize(const std::unique_ptr<Adafruit_NeoMatrix>& matrix)
     {
         int16_t x1, y1;
-        matrix->getTextBounds(_text, _x, _y, &x1, &y1, &_textWidth, &_textHeight);
+        matrix->getTextBounds(_text, _x, _y, &x1, &y1, &_width, &_height);
     }
 
 public:
@@ -30,10 +25,10 @@ public:
         delete[] _text;
     }
 
-    Text(Color color, const char* format, ...)
-        : _color(color), _x(0), _y(0)
+    Text(uint16_t color, const char* format, ...)
+        : IRenderedComponent(0, 0, 0, 0), _color(color)
     {
-        _logger = LoggerFactory::Create(this);
+        _logger = LoggerFactory::Create("Text");
 
         _text = new char[512];
 
@@ -47,12 +42,12 @@ public:
     {
         _logger->Trace("Matrix: w(%d), h(%d)", matrix->width(), matrix->height());
         _calculateTextSize(matrix);
-        _logger->Trace("Text: w(%d), h(%d)", _textWidth, _textHeight);
+        _logger->Trace("Text: w(%d), h(%d)", _width, _height);
         _logger->Trace("Setting Size to %d", 1);
         matrix->setTextSize(1);
-        matrix->setTextColor(matrix->Color(_color.r, _color.g, _color.b));
+        matrix->setTextColor(_color);
         _x = matrix->width();
-        _y = (matrix->height() - _textHeight) / 2; // Center text
+        _y = (matrix->height() - _height) / 2; // Center text
         return true;
     }
 
@@ -60,14 +55,8 @@ public:
     {
         matrix->setCursor(_x, _y);
         matrix->print(F(_text));
-        _logger->Trace("Text[w(%d), h(%d)]: %s", _textWidth, _textHeight, _text);
+        _logger->Trace("Text[w(%d), h(%d)]: %s", _width, _height, _text);
         _logger->Trace("Cursor: x(%d), y(%d)", _x, _y);
-        // Scroll text from right to left
-        if (--_x <= (_textWidth * -1))
-        {
-            _logger->Trace("Resetting X");
-            _x = matrix->width();
-        }
     }
 };
 
